@@ -11,9 +11,9 @@ import { DocumentUploadScreen } from "@/components/phone/screens/DocumentUploadS
 import { JointDocumentScreen } from "@/components/phone/screens/JointDocumentScreen";
 import { ProcessingScreen } from "@/components/phone/screens/ProcessingScreen";
 import { SubmittedScreen } from "@/components/phone/screens/SubmittedScreen";
+import { BehindTheScenePanel } from "@/components/orchestration/BehindTheScenePanel";
 import { useNilamFlow } from "@/hooks/useNilamFlow";
 import { PERSONAS } from "@/data/personas";
-import { cn } from "@/lib/cn";
 
 /** Slide-x + fade transition variants for AnimatePresence screens. */
 const slideVariants = {
@@ -27,10 +27,13 @@ const slideTransition = { duration: 0.25 };
 export default function Page() {
   const {
     persona,
+    steps,
     currentStep,
     canGoBack,
     uploads,
     events,
+    nasabah,
+    pasangan,
     selectPersona,
     start,
     next,
@@ -187,72 +190,20 @@ export default function Page() {
   );
 
   // -------------------------------------------------------------------------
-  // Panel column — TEMP persona selector for Phase 3 testability
-  // {/* TEMP: replaced by real BehindTheScenePanel in Phase 4 */}
+  // Panel column — Phase 4: BehindTheScenePanel
   // -------------------------------------------------------------------------
 
   const panel = (
-    <div className="rounded-card bg-white p-6 shadow-panel ring-1 ring-bri-line">
-      {/* TEMP: replaced by real BehindTheScenePanel in Phase 4 */}
-      <h3 className="mb-1 text-base font-bold text-bri-navy">Behind The Scene Logic</h3>
-      <p className="mb-5 text-xs text-bri-muted">
-        Persona selector — pilih untuk memulai skenario aplikasi.
-      </p>
-
-      {/* Persona selector buttons */}
-      <div className="mb-6 flex flex-col gap-2">
-        {PERSONAS.map((p) => {
-          const isActive = persona?.id === p.id;
-          return (
-            <button
-              key={p.id}
-              type="button"
-              onClick={() => selectPersona(p.id)}
-              className={cn(
-                "rounded-bubble px-4 py-3 text-left text-sm font-medium transition",
-                "ring-1",
-                isActive
-                  ? "bg-bri-navy text-white ring-bri-navy shadow-soft"
-                  : "bg-bri-bg text-bri-ink ring-bri-line hover:ring-bri-blue hover:bg-white"
-              )}
-            >
-              <span className="font-semibold">{p.shortLabel}</span>
-              <span
-                className={cn(
-                  "ml-2 text-xs",
-                  isActive ? "text-bri-sky" : "text-bri-muted"
-                )}
-              >
-                {p.label}
-              </span>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Debug info */}
-      <div className="rounded-card bg-bri-bg px-4 py-3 ring-1 ring-bri-line">
-        <p className="text-xs font-semibold uppercase tracking-wide text-bri-muted mb-2">
-          Debug
-        </p>
-        <div className="space-y-1 text-xs text-bri-ink">
-          <div className="flex justify-between">
-            <span className="text-bri-muted">current step</span>
-            <span className="font-mono font-semibold text-bri-navy">{currentStep}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-bri-muted">events fired</span>
-            <span className="font-mono font-semibold text-bri-navy">{events.length}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-bri-muted">persona</span>
-            <span className="font-mono font-semibold text-bri-navy">
-              {persona?.id ?? "—"}
-            </span>
-          </div>
-        </div>
-      </div>
-    </div>
+    <BehindTheScenePanel
+      persona={persona}
+      personas={PERSONAS}
+      currentStep={currentStep}
+      steps={steps}
+      events={events}
+      nasabah={nasabah}
+      pasangan={pasangan}
+      onSelectPersona={selectPersona}
+    />
   );
 
   return <AppShell phone={phone} panel={panel} />;
