@@ -6,6 +6,7 @@ import { SLIP_GAJI, MUTASI } from "@/data/ocrFixtures";
 import type { PersonaConfig, FlowStep } from "@/types/flow";
 import type { OrchestrationEvent } from "@/types/orchestration";
 import type { FraudResult, IdentityResult, SlikResult } from "@/types/engines";
+import type { CustomerIncome, ComponentKey, ComponentMode } from "@/types/income";
 import { PersonaSelector } from "./PersonaSelector";
 import { OrchestrationPipeline } from "./OrchestrationPipeline";
 import { OcrProcessingCard } from "./OcrProcessingCard";
@@ -13,13 +14,19 @@ import { OcrJsonCard } from "./OcrJsonCard";
 import { FraudDetectionCard } from "./FraudDetectionCard";
 import { IdentityCheckCard } from "./IdentityCheckCard";
 import { SlikRetrievalCard } from "./SlikRetrievalCard";
+import { IncomeComponentsCard } from "./IncomeComponentsCard";
+import { ThpEngineCard } from "./ThpEngineCard";
 
 interface BehindTheSceneProps {
   persona: PersonaConfig | null;
   currentStep: FlowStep;
   events: OrchestrationEvent[];
+  nasabah: CustomerIncome | undefined;
+  pasangan: CustomerIncome | undefined;
   onSelectPersona: (id: string) => void;
   onReset: () => void;
+  setComponentMode: (role: "nasabah" | "pasangan", key: ComponentKey, mode: ComponentMode) => void;
+  setComponentWeight: (role: "nasabah" | "pasangan", key: ComponentKey, weight: number) => void;
 }
 
 /**
@@ -33,8 +40,12 @@ interface BehindTheSceneProps {
 export function BehindTheScene({
   persona,
   events,
+  nasabah,
+  pasangan,
   onSelectPersona,
   onReset,
+  setComponentMode,
+  setComponentWeight,
 }: BehindTheSceneProps) {
   const { latest, statusOf } = useOrchestrationFeed(events);
   const ocrStatus = statusOf("ocr");
@@ -89,25 +100,26 @@ export function BehindTheScene({
         />
       </div>
 
-      {/* ── ROW C — Income · THP (Pass 6) ────────────────────────────────── */}
+      {/* ── ROW C — Income Nasabah · THP · Income Pasangan (Pass 6) ─────── */}
       <div className="grid shrink-0 grid-cols-3 gap-2">
-        {(["Income Nasabah", "THP Engine", "Income Pasangan"] as const).map(
-          (label) => (
-            <PlaceholderCard key={label} label={label} pass={6} />
-          )
-        )}
-      </div>
-    </div>
-  );
-}
-
-/** Dashed placeholder card for rows B & C — filled in by later passes. */
-function PlaceholderCard({ label, pass }: { label: string; pass: number }) {
-  return (
-    <div className="flex min-h-[72px] items-center justify-center rounded-xl border border-dashed border-nx-line bg-white/60 px-2 py-2 text-center">
-      <div>
-        <p className="text-[9px] font-semibold text-nx-muted">{label}</p>
-        <p className="mt-0.5 text-[8px] text-gray-300">(Pass {pass})</p>
+        <IncomeComponentsCard
+          title="INCOME COMPONENTS - NASABAH"
+          income={nasabah}
+          onMode={(k, m) => setComponentMode("nasabah", k, m)}
+          onWeight={(k, w) => setComponentWeight("nasabah", k, w)}
+        />
+        <ThpEngineCard
+          nasabah={nasabah}
+          pasangan={pasangan}
+          isJoint={!!persona?.isJointIncome}
+        />
+        <IncomeComponentsCard
+          title="INCOME COMPONENTS - PASANGAN"
+          income={pasangan}
+          stripped={!persona?.isJointIncome}
+          onMode={(k, m) => setComponentMode("pasangan", k, m)}
+          onWeight={(k, w) => setComponentWeight("pasangan", k, w)}
+        />
       </div>
     </div>
   );

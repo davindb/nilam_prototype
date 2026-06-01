@@ -25,7 +25,7 @@ function tokenize(value: unknown, indent = 0): Token[] {
   const padInner = "  ".repeat(indent + 1);
 
   if (typeof value === "number") {
-    tokens.push({ type: "number", text: value.toLocaleString("id-ID") });
+    tokens.push({ type: "number", text: String(value) });
   } else if (typeof value === "object" && value !== null) {
     tokens.push({ type: "punctuation", text: "{" });
     const entries = Object.entries(value as Record<string, unknown>);

@@ -30,8 +30,12 @@ export default function Page() {
           persona={flow.persona}
           currentStep={flow.currentStep}
           events={flow.events}
+          nasabah={flow.nasabah}
+          pasangan={flow.pasangan}
           onSelectPersona={flow.selectPersona}
           onReset={flow.reset}
+          setComponentMode={flow.setComponentMode}
+          setComponentWeight={flow.setComponentWeight}
         />
       }
     />
