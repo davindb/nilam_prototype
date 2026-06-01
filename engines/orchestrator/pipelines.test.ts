@@ -8,8 +8,9 @@ describe("buildPipeline", () => {
   describe("payroll-single", () => {
     const nodes = buildPipeline(byId("payroll-single"));
 
-    it("starts with payroll_pull", () => {
+    it("starts with payroll_pull on nasabah", () => {
       expect(nodes[0].nodeId).toBe("payroll_pull");
+      expect(nodes[0].leg).toBe("nasabah");
     });
 
     it("ends with thp_computation", () => {
@@ -25,87 +26,20 @@ describe("buildPipeline", () => {
       const pasanganNodes = nodes.filter((n) => n.leg === "pasangan");
       expect(pasanganNodes).toHaveLength(0);
     });
-  });
 
-  describe("nonpayroll-joint", () => {
-    const nodes = buildPipeline(byId("nonpayroll-joint"));
-
-    it("has both nasabah and pasangan legs", () => {
-      const legs = new Set(nodes.map((n) => n.leg));
-      expect(legs.has("nasabah")).toBe(true);
-      expect(legs.has("pasangan")).toBe(true);
-    });
-
-    it("ends with thp_computation", () => {
-      expect(nodes[nodes.length - 1].nodeId).toBe("thp_computation");
-    });
-
-    it("nasabah leg has OCR nodes", () => {
-      const nasabahOcr = nodes.filter((n) => n.leg === "nasabah" && n.group === "ocr");
-      expect(nasabahOcr.length).toBeGreaterThan(0);
-    });
-
-    it("pasangan leg has identity_ocr and liveness_selfie", () => {
-      const identityNodes = nodes.filter((n) => n.leg === "pasangan" && n.group === "identity");
-      const nodeIds = identityNodes.map((n) => n.nodeId);
-      expect(nodeIds).toContain("identity_ocr");
-      expect(nodeIds).toContain("liveness_selfie");
-    });
-
-    it("pasangan leg appears after nasabah leg income_extraction", () => {
-      const nasabahIncomeIdx = nodes.findIndex(
-        (n) => n.leg === "nasabah" && n.nodeId === "income_extraction"
-      );
-      const firstPasanganIdx = nodes.findIndex((n) => n.leg === "pasangan");
-      expect(firstPasanganIdx).toBeGreaterThan(nasabahIncomeIdx);
-    });
-
-    it("pasangan leg has exact node chain", () => {
-      const pasanganNodes = nodes.filter((n) => n.leg === "pasangan").map((n) => n.nodeId);
-      expect(pasanganNodes).toEqual([
-        "identity_ocr",
-        "liveness_selfie",
-        "ocr_slip",
-        "ocr_mutasi",
-        "fraud_screening",
+    it("has exact nasabah node chain", () => {
+      const chain = nodes.map((n) => n.nodeId);
+      expect(chain).toEqual([
+        "payroll_pull",
         "slik_retrieval",
         "income_extraction",
+        "thp_computation",
       ]);
     });
-  });
 
-  describe("payroll-joint", () => {
-    const nodes = buildPipeline(byId("payroll-joint"));
-
-    it("starts with payroll_pull on nasabah", () => {
-      expect(nodes[0].nodeId).toBe("payroll_pull");
-      expect(nodes[0].leg).toBe("nasabah");
-    });
-
-    it("has pasangan leg nodes", () => {
-      const pasanganNodes = nodes.filter((n) => n.leg === "pasangan");
-      expect(pasanganNodes.length).toBeGreaterThan(0);
-    });
-
-    it("ends with thp_computation", () => {
-      expect(nodes[nodes.length - 1].nodeId).toBe("thp_computation");
-    });
-
-    it("has exact full node chain", () => {
-      const chain = nodes.map((n) => `${n.leg}:${n.nodeId}`);
-      expect(chain).toEqual([
-        "nasabah:payroll_pull",
-        "nasabah:slik_retrieval",
-        "nasabah:income_extraction",
-        "pasangan:identity_ocr",
-        "pasangan:liveness_selfie",
-        "pasangan:ocr_slip",
-        "pasangan:ocr_mutasi",
-        "pasangan:fraud_screening",
-        "pasangan:slik_retrieval",
-        "pasangan:income_extraction",
-        "nasabah:thp_computation",
-      ]);
+    it("has exactly one slik_retrieval node", () => {
+      const slikNodes = nodes.filter((n) => n.nodeId === "slik_retrieval");
+      expect(slikNodes).toHaveLength(1);
     });
   });
 
@@ -140,6 +74,135 @@ describe("buildPipeline", () => {
         "slik_retrieval",
         "income_extraction",
         "thp_computation",
+      ]);
+    });
+
+    it("has exactly one slik_retrieval node", () => {
+      const slikNodes = nodes.filter((n) => n.nodeId === "slik_retrieval");
+      expect(slikNodes).toHaveLength(1);
+    });
+  });
+
+  describe("payroll-joint", () => {
+    const nodes = buildPipeline(byId("payroll-joint"));
+
+    it("starts with payroll_pull on nasabah", () => {
+      expect(nodes[0].nodeId).toBe("payroll_pull");
+      expect(nodes[0].leg).toBe("nasabah");
+    });
+
+    it("has pasangan leg nodes", () => {
+      const pasanganNodes = nodes.filter((n) => n.leg === "pasangan");
+      expect(pasanganNodes.length).toBeGreaterThan(0);
+    });
+
+    it("ends with thp_computation", () => {
+      expect(nodes[nodes.length - 1].nodeId).toBe("thp_computation");
+    });
+
+    it("pasangan leg uses payroll_pull (spouse is payroll BRI)", () => {
+      const pasanganPayroll = nodes.filter(
+        (n) => n.leg === "pasangan" && n.nodeId === "payroll_pull"
+      );
+      expect(pasanganPayroll).toHaveLength(1);
+    });
+
+    it("pasangan leg has no OCR income nodes (ocr_slip / ocr_mutasi)", () => {
+      const pasanganOcr = nodes.filter(
+        (n) => n.leg === "pasangan" && (n.nodeId === "ocr_slip" || n.nodeId === "ocr_mutasi")
+      );
+      expect(pasanganOcr).toHaveLength(0);
+    });
+
+    it("has TWO slik_retrieval nodes (one per leg)", () => {
+      const slikNodes = nodes.filter((n) => n.nodeId === "slik_retrieval");
+      expect(slikNodes).toHaveLength(2);
+      expect(slikNodes.map((n) => n.leg)).toEqual(["nasabah", "pasangan"]);
+    });
+
+    it("pasangan leg has exact node chain: identity_ocr, liveness_selfie, payroll_pull, slik_retrieval, income_extraction", () => {
+      const pasanganNodes = nodes.filter((n) => n.leg === "pasangan").map((n) => n.nodeId);
+      expect(pasanganNodes).toEqual([
+        "identity_ocr",
+        "liveness_selfie",
+        "payroll_pull",
+        "slik_retrieval",
+        "income_extraction",
+      ]);
+    });
+
+    it("has exact full node chain", () => {
+      const chain = nodes.map((n) => `${n.leg}:${n.nodeId}`);
+      expect(chain).toEqual([
+        "nasabah:payroll_pull",
+        "nasabah:slik_retrieval",
+        "nasabah:income_extraction",
+        "pasangan:identity_ocr",
+        "pasangan:liveness_selfie",
+        "pasangan:payroll_pull",
+        "pasangan:slik_retrieval",
+        "pasangan:income_extraction",
+        "nasabah:thp_computation",
+      ]);
+    });
+  });
+
+  describe("nonpayroll-joint", () => {
+    const nodes = buildPipeline(byId("nonpayroll-joint"));
+
+    it("has both nasabah and pasangan legs", () => {
+      const legs = new Set(nodes.map((n) => n.leg));
+      expect(legs.has("nasabah")).toBe(true);
+      expect(legs.has("pasangan")).toBe(true);
+    });
+
+    it("ends with thp_computation", () => {
+      expect(nodes[nodes.length - 1].nodeId).toBe("thp_computation");
+    });
+
+    it("nasabah leg has OCR nodes", () => {
+      const nasabahOcr = nodes.filter((n) => n.leg === "nasabah" && n.group === "ocr");
+      expect(nasabahOcr.length).toBeGreaterThan(0);
+    });
+
+    it("pasangan leg has identity_ocr and liveness_selfie", () => {
+      const identityNodes = nodes.filter((n) => n.leg === "pasangan" && n.group === "identity");
+      const nodeIds = identityNodes.map((n) => n.nodeId);
+      expect(nodeIds).toContain("identity_ocr");
+      expect(nodeIds).toContain("liveness_selfie");
+    });
+
+    it("pasangan leg has no payroll_pull (spouse is non-payroll)", () => {
+      const pasanganPayroll = nodes.filter(
+        (n) => n.leg === "pasangan" && n.nodeId === "payroll_pull"
+      );
+      expect(pasanganPayroll).toHaveLength(0);
+    });
+
+    it("pasangan leg appears after nasabah leg income_extraction", () => {
+      const nasabahIncomeIdx = nodes.findIndex(
+        (n) => n.leg === "nasabah" && n.nodeId === "income_extraction"
+      );
+      const firstPasanganIdx = nodes.findIndex((n) => n.leg === "pasangan");
+      expect(firstPasanganIdx).toBeGreaterThan(nasabahIncomeIdx);
+    });
+
+    it("has TWO slik_retrieval nodes (one per leg)", () => {
+      const slikNodes = nodes.filter((n) => n.nodeId === "slik_retrieval");
+      expect(slikNodes).toHaveLength(2);
+      expect(slikNodes.map((n) => n.leg)).toEqual(["nasabah", "pasangan"]);
+    });
+
+    it("pasangan leg has exact node chain: identity_ocr, liveness_selfie, ocr_slip, ocr_mutasi, fraud_screening, slik_retrieval, income_extraction", () => {
+      const pasanganNodes = nodes.filter((n) => n.leg === "pasangan").map((n) => n.nodeId);
+      expect(pasanganNodes).toEqual([
+        "identity_ocr",
+        "liveness_selfie",
+        "ocr_slip",
+        "ocr_mutasi",
+        "fraud_screening",
+        "slik_retrieval",
+        "income_extraction",
       ]);
     });
   });

@@ -8,20 +8,20 @@ const make = (o: Partial<PersonaConfig>): PersonaConfig => ({
 });
 
 describe("planFlow", () => {
-  it("payroll non-joint skips income_type & upload, uses payroll_confirm", () => {
-    expect(planFlow(make({ isPayrollBRI: true }))).toEqual(
-      ["opening", "payroll_confirm", "processing", "submitted"]);
+  it("payroll-single: skips income_type, no spouse steps", () => {
+    expect(planFlow(make({ isPayrollBRI: true, isJointIncome: false }))).toEqual(
+      ["opening", "joint_income", "requirement_nasabah", "processing", "submitted"]);
   });
-  it("non-payroll non-joint shows income_type + document_upload", () => {
-    expect(planFlow(make({ isPayrollBRI: false }))).toEqual(
-      ["opening", "income_type", "document_upload", "processing", "submitted"]);
+  it("payroll-joint: skips income_type, adds spouse_identity + spouse_confirm (spouse payroll)", () => {
+    expect(planFlow(make({ isPayrollBRI: true, isJointIncome: true, spouseIsPayrollBRI: true }))).toEqual(
+      ["opening", "joint_income", "requirement_nasabah", "spouse_identity", "spouse_confirm", "processing", "submitted"]);
   });
-  it("payroll joint adds joint_documents", () => {
-    expect(planFlow(make({ isPayrollBRI: true, isJointIncome: true }))).toEqual(
-      ["opening", "payroll_confirm", "joint_documents", "processing", "submitted"]);
+  it("nonpayroll-single: includes income_type, no spouse steps", () => {
+    expect(planFlow(make({ isPayrollBRI: false, isJointIncome: false }))).toEqual(
+      ["opening", "income_type", "joint_income", "requirement_nasabah", "processing", "submitted"]);
   });
-  it("non-payroll joint adds joint_documents after upload", () => {
-    expect(planFlow(make({ isJointIncome: true }))).toEqual(
-      ["opening", "income_type", "document_upload", "joint_documents", "processing", "submitted"]);
+  it("nonpayroll-joint: includes income_type, adds spouse_identity + spouse_income (spouse non-payroll)", () => {
+    expect(planFlow(make({ isPayrollBRI: false, isJointIncome: true, spouseIsPayrollBRI: false }))).toEqual(
+      ["opening", "income_type", "joint_income", "requirement_nasabah", "spouse_identity", "spouse_income", "processing", "submitted"]);
   });
 });

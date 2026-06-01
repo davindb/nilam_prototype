@@ -60,7 +60,7 @@ describe("nilamReducer — selectPersona", () => {
     const prior: NilamState = {
       ...initialState(),
       persona: makePersona("payroll-single"),
-      steps: ["opening", "payroll_confirm", "processing", "submitted"],
+      steps: ["opening", "joint_income", "requirement_nasabah", "processing", "submitted"],
       stepIndex: 2,
       uploads: { slip: true },
       events: [makeEvent()],
@@ -76,25 +76,28 @@ describe("nilamReducer — selectPersona", () => {
     expect(state.pasangan).toBeUndefined();
   });
 
-  it("nonpayroll-joint planFlow contains income_type, document_upload, joint_documents", () => {
+  it("nonpayroll-joint planFlow contains income_type, joint_income, requirement_nasabah, spouse_identity, spouse_income", () => {
     const persona = makePersona("nonpayroll-joint");
     const state = nilamReducer(initialState(), { type: "selectPersona", persona });
 
     expect(state.steps).toEqual([
       "opening",
       "income_type",
-      "document_upload",
-      "joint_documents",
+      "joint_income",
+      "requirement_nasabah",
+      "spouse_identity",
+      "spouse_income",
       "processing",
       "submitted",
     ]);
   });
 
-  it("payroll-single planFlow contains payroll_confirm but not income_type", () => {
+  it("payroll-single planFlow contains joint_income and requirement_nasabah but not income_type", () => {
     const persona = makePersona("payroll-single");
     const state = nilamReducer(initialState(), { type: "selectPersona", persona });
 
-    expect(state.steps).toContain("payroll_confirm");
+    expect(state.steps).toContain("joint_income");
+    expect(state.steps).toContain("requirement_nasabah");
     expect(state.steps).not.toContain("income_type");
     expect(state.steps).not.toContain("document_upload");
   });
@@ -119,7 +122,7 @@ describe("nilamReducer — next", () => {
 
   it("clamps at the last step index — does not go beyond steps.length - 1", () => {
     const persona = makePersona("payroll-single");
-    // payroll-single: opening, payroll_confirm, processing, submitted → 4 steps, last idx = 3
+    // payroll-single: opening, joint_income, requirement_nasabah, processing, submitted → 5 steps, last idx = 4
     let state = nilamReducer(initialState(), { type: "selectPersona", persona });
 
     // Advance past the last step many times
@@ -156,7 +159,7 @@ describe("nilamReducer — goBack", () => {
   it("does NOT clear events/nasabah/pasangan when leaving a normal step", () => {
     const persona = makePersona("payroll-single");
     let state = nilamReducer(initialState(), { type: "selectPersona", persona });
-    state = nilamReducer(state, { type: "next" }); // stepIndex = 1 (payroll_confirm)
+    state = nilamReducer(state, { type: "next" }); // stepIndex = 1 (joint_income)
     state = { ...state, events: [makeEvent()], nasabah: makeIncome("nasabah") };
 
     const after = nilamReducer(state, { type: "goBack" });
@@ -304,7 +307,7 @@ describe("nilamReducer — reset", () => {
   it("returns to initial state: persona null, steps=['opening'], stepIndex 0", () => {
     const populated: NilamState = {
       persona: makePersona("payroll-joint"),
-      steps: ["opening", "payroll_confirm", "joint_documents", "processing", "submitted"],
+      steps: ["opening", "joint_income", "requirement_nasabah", "spouse_identity", "spouse_confirm", "processing", "submitted"],
       stepIndex: 3,
       uploads: { slip: true, mutasi: true },
       events: [makeEvent(), makeEvent()],
@@ -346,10 +349,10 @@ describe("nilamReducer — goTo", () => {
   });
 
   it("is a no-op for an absent step", () => {
-    const persona = makePersona("payroll-single"); // no 'document_upload' in this flow
+    const persona = makePersona("payroll-single"); // no 'income_type' in payroll flow
     const s0 = nilamReducer(initialState(), { type: "selectPersona", persona });
 
-    const after = nilamReducer(s0, { type: "goTo", step: "document_upload" });
+    const after = nilamReducer(s0, { type: "goTo", step: "income_type" });
     expect(after.stepIndex).toBe(s0.stepIndex);
   });
 });

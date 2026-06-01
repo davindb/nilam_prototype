@@ -259,6 +259,7 @@ export function useNilamFlow() {
       [nodeKey("nasabah", "doc_classification")]: { documents: ["Slip Gaji", "Mutasi 12 Bulan"], quality: "baik" },
       [nodeKey("pasangan", "identity_ocr")]: KTP_PASANGAN,
       [nodeKey("pasangan", "liveness_selfie")]: livenessMatch(),
+      [nodeKey("pasangan", "payroll_pull")]: { source: "BRI Payroll (Pasangan)", mutasi: SPOUSE_MUTASI },
       [nodeKey("pasangan", "ocr_slip")]: SPOUSE_SLIP_GAJI,
       [nodeKey("pasangan", "ocr_mutasi")]: SPOUSE_MUTASI,
       [nodeKey("pasangan", "fraud_screening")]: screen("dokumen pasangan"),
