@@ -48,11 +48,11 @@ export class WorkflowOrchestrator {
       const base = { nodeId: node.nodeId, leg: node.leg, label: node.label };
 
       emit({ ...base, status: "running", progress: 0.15, reasoning: REASONING[node.nodeId], ts: Date.now() });
-      await this.delay(440);
+      await this.delay(360);
       if (this.cancelled) return;
 
       emit({ ...base, status: "running", progress: 0.7, ts: Date.now() });
-      await this.delay(360);
+      await this.delay(300);
       if (this.cancelled) return;
 
       const confidence =
@@ -65,7 +65,7 @@ export class WorkflowOrchestrator {
         output: outputs[nodeKey(node.leg, node.nodeId)],
         ts: Date.now(),
       });
-      await this.delay(160);
+      await this.delay(140);
     }
   }
 }
