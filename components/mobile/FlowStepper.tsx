@@ -14,22 +14,23 @@ interface StepNode {
 
 const NODES: StepNode[] = [
   { number: 1, label: "Opening" },
-  { number: 2, label: "Income Type" },
-  { number: 3, label: "Upload", sublabel: "Dokumen" },
-  { number: 4, label: "Joint Income" },
-  { number: 5, label: "Se..." }, // Analyst Decision — truncated to fit
+  { number: 2, label: "Income", sublabel: "Type" },
+  { number: 3, label: "Joint", sublabel: "Income" },
+  { number: 4, label: "Require-", sublabel: "ment" },
+  { number: 5, label: "Analyst", sublabel: "Decision" },
 ];
 
 // Map currentStep → which node index (0-based) is "active"
+// Spec order: opening→1, income_type→2, joint_income→3, requirement→4, processing→4(loading), analyst_decision→5
 function getActiveIndex(step: FlowStep): number {
   switch (step) {
-    case "opening":        return 0;
-    case "income_type":    return 1;
-    case "requirement":    return 2;
-    case "processing":     return 2; // processing = still on requirement node (loading)
-    case "joint_income":   return 3;
-    case "analyst_decision": return 4;
-    default:               return 0;
+    case "opening":           return 0;
+    case "income_type":       return 1;
+    case "joint_income":      return 2;
+    case "requirement":       return 3;
+    case "processing":        return 3; // processing = still on requirement node (loading)
+    case "analyst_decision":  return 4;
+    default:                  return 0;
   }
 }
 
