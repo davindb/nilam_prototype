@@ -53,21 +53,21 @@ export function ThpEngineCard({ nasabah, pasangan, isJoint }: ThpEngineCardProps
     : [];
 
   return (
-    <div className="flex flex-col rounded-xl border border-nx-line bg-white px-2 py-1.5 shadow-sm">
+    <div className="flex flex-col rounded-xl bg-white px-2 py-1.5 shadow-soft ring-1 ring-bri-line min-h-0">
       {/* Header */}
-      <span className="mb-1 block text-[8px] font-bold uppercase tracking-widest text-nx-muted leading-none">
+      <span className="mb-1 block text-[8px] font-semibold uppercase tracking-[0.12em] text-bri-muted leading-none">
         THP Calculation Engine
       </span>
 
       {pending ? (
         <div className="flex flex-1 items-center justify-center py-4">
-          <span className="text-[9px] italic text-gray-300">Menunggu…</span>
+          <span className="text-[9px] italic text-bri-muted/40">Menunggu…</span>
         </div>
       ) : (
         <>
           {/* RUMUS (formula chips) */}
           <div className="mb-1.5">
-            <span className="text-[7px] font-semibold uppercase tracking-wider text-nx-muted">
+            <span className="text-[7px] font-semibold uppercase tracking-wider text-bri-muted">
               Rumus
             </span>
             <div className="mt-0.5 flex flex-wrap items-center gap-0.5">
@@ -77,7 +77,7 @@ export function ThpEngineCard({ nasabah, pasangan, isJoint }: ThpEngineCardProps
                     <span
                       className={cn(
                         "text-[8px] font-bold",
-                        chip.type === "deduct" ? "text-red-400" : "text-nx-muted",
+                        chip.type === "deduct" ? "text-red-400" : "text-bri-muted",
                       )}
                     >
                       {chip.type === "deduct" ? "−" : "+"}
@@ -87,7 +87,7 @@ export function ThpEngineCard({ nasabah, pasangan, isJoint }: ThpEngineCardProps
                     className={cn(
                       "flex flex-col items-center rounded px-1 py-0.5",
                       chip.type === "income"
-                        ? "bg-nx-blue/10 text-nx-blue"
+                        ? "bg-bri-bg text-bri-blue"
                         : "bg-red-50 text-red-500",
                     )}
                   >
@@ -104,13 +104,13 @@ export function ThpEngineCard({ nasabah, pasangan, isJoint }: ThpEngineCardProps
           {/* THP boxes row */}
           <div className="mb-1 grid grid-cols-2 gap-1">
             {/* THP Nasabah */}
-            <div className="rounded-lg border border-nx-blue/20 bg-nx-blue/5 p-1.5">
-              <span className="block text-[7px] font-semibold uppercase text-nx-muted leading-none mb-0.5">
+            <div className="rounded-lg border border-bri-navy/20 bg-bri-bg p-1.5">
+              <span className="block text-[7px] font-semibold uppercase text-bri-muted leading-none mb-0.5">
                 THP Nasabah
               </span>
               <AnimatedThp
                 value={nasabahThp}
-                className="block text-[12px] font-bold text-nx-blue leading-tight"
+                className="block text-[12px] font-bold text-bri-navy leading-tight"
               />
             </div>
 
@@ -119,32 +119,32 @@ export function ThpEngineCard({ nasabah, pasangan, isJoint }: ThpEngineCardProps
               className={cn(
                 "rounded-lg border p-1.5",
                 isJoint && pThp
-                  ? "border-nx-blue/20 bg-nx-blue/5"
-                  : "border-dashed border-nx-line bg-gray-50 opacity-50",
+                  ? "border-bri-navy/20 bg-bri-bg"
+                  : "border-dashed border-bri-line bg-bri-bg/40 opacity-50",
               )}
             >
-              <span className="block text-[7px] font-semibold uppercase text-nx-muted leading-none mb-0.5">
+              <span className="block text-[7px] font-semibold uppercase text-bri-muted leading-none mb-0.5">
                 THP Pasangan
               </span>
               {isJoint && pThp ? (
                 <AnimatedThp
                   value={pasanganThp}
-                  className="block text-[12px] font-bold text-nx-blue leading-tight"
+                  className="block text-[12px] font-bold text-bri-navy leading-tight"
                 />
               ) : (
-                <span className="block text-[12px] font-bold text-nx-muted leading-tight">—</span>
+                <span className="block text-[12px] font-bold text-bri-muted leading-tight">—</span>
               )}
             </div>
           </div>
 
           {/* THP Total — headline */}
-          <div className="rounded-lg border border-nx-blue/30 bg-gradient-to-br from-nx-blue/10 to-indigo-50 p-1.5">
-            <span className="block text-[7px] font-semibold uppercase text-nx-muted leading-none mb-0.5">
+          <div className="rounded-lg border border-bri-navy/25 bg-gradient-to-br from-bri-bg to-bri-bg/60 p-1.5">
+            <span className="block text-[7px] font-semibold uppercase text-bri-muted leading-none mb-0.5">
               {isJoint ? "THP Total (Joint Income)" : "THP Total"}
             </span>
             <AnimatedThp
               value={totalThp}
-              className="block text-[16px] font-extrabold text-nx-blue leading-tight"
+              className="block text-[16px] font-extrabold text-bri-navy leading-tight"
             />
           </div>
         </>

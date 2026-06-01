@@ -91,11 +91,11 @@ export function SpiderChart({ scores, labels, size = 100 }: SpiderChartProps) {
         );
       })}
 
-      {/* Data polygon — animated scale-in */}
+      {/* Data polygon — animated scale-in, bri-navy stroke/fill */}
       <motion.polygon
         points={dataPoints}
-        fill="rgba(37,99,235,0.14)"
-        stroke="#2563EB"
+        fill="rgba(0,82,156,0.12)"
+        stroke="#00529C"
         strokeWidth={1.4}
         strokeLinejoin="round"
         initial={{ points: idlePoints, opacity: 0 }}
@@ -113,7 +113,7 @@ export function SpiderChart({ scores, labels, size = 100 }: SpiderChartProps) {
             cx={x}
             cy={y}
             r={2.2}
-            fill="#2563EB"
+            fill="#00529C"
             initial={{ opacity: 0, r: 0 }}
             animate={{ opacity: 1, r: 2.2 }}
             transition={{ duration: 0.4, delay: 0.5 + i * 0.07 }}
@@ -134,7 +134,7 @@ export function SpiderChart({ scores, labels, size = 100 }: SpiderChartProps) {
               textAnchor="middle"
               dominantBaseline="middle"
               fontSize="6"
-              fill="#64748B"
+              fill="#6B7280"
             >
               {lbl}
             </text>

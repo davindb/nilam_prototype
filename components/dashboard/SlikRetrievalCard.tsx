@@ -26,11 +26,11 @@ function SlikRow({
 }) {
   return (
     <div className="flex items-start justify-between gap-1">
-      <span className="shrink-0 text-[8.5px] text-nx-muted">{label}</span>
+      <span className="shrink-0 text-[8.5px] text-bri-muted">{label}</span>
       <span
         className={
           valueClassName ??
-          "text-right text-[8.5px] font-medium text-nx-ink"
+          "text-right text-[8.5px] font-medium text-bri-ink"
         }
       >
         {value}
@@ -52,16 +52,16 @@ export function SlikRetrievalCard({ status, slik }: SlikRetrievalCardProps) {
   const isSuccess = status === "success" && !!slik;
 
   return (
-    <div className="flex flex-col rounded-xl border border-nx-line bg-white px-2.5 py-2 shadow-sm">
+    <div className="flex flex-col rounded-xl bg-white px-2.5 py-2 shadow-soft ring-1 ring-bri-line min-h-0">
       {/* Header */}
       <div className="mb-1.5 flex items-center justify-between gap-1">
-        <span className="text-[9px] font-bold uppercase tracking-widest text-nx-muted">
+        <span className="text-[9px] font-semibold uppercase tracking-[0.12em] text-bri-muted">
           SLIK Retrieval
         </span>
         {isSuccess && (
-          <div className="flex items-center gap-0.5 rounded-full bg-nx-okLight px-1.5 py-0.5">
-            <CheckCircle2 size={8} className="text-nx-ok" strokeWidth={2.5} />
-            <span className="text-[7.5px] font-semibold text-nx-ok">Completed</span>
+          <div className="flex items-center gap-0.5 rounded-pill bg-emerald-50 px-1.5 py-0.5">
+            <CheckCircle2 size={8} className="text-emerald-500" strokeWidth={2.5} />
+            <span className="text-[7.5px] font-semibold text-emerald-600">Completed</span>
           </div>
         )}
       </div>
@@ -69,17 +69,17 @@ export function SlikRetrievalCard({ status, slik }: SlikRetrievalCardProps) {
       {!isSuccess ? (
         /* ── Idle / running ───────────────────────────────────── */
         <div className="flex items-center gap-2">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-dashed border-gray-200 bg-gray-50">
-            <Landmark size={16} className="text-gray-300" strokeWidth={1.5} />
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-dashed border-bri-line bg-bri-bg/40">
+            <Landmark size={16} className="text-bri-muted/40" strokeWidth={1.5} />
           </div>
-          <p className="text-[9px] italic text-gray-300">Menunggu SLIK…</p>
+          <p className="text-[9px] italic text-bri-muted/40">Menunggu SLIK…</p>
         </div>
       ) : (
         /* ── Success ──────────────────────────────────────────── */
         <div className="flex items-start gap-2">
           {/* SLIK icon tile */}
-          <div className="flex h-10 w-10 shrink-0 flex-col items-center justify-center gap-0.5 rounded-lg border border-nx-blue/20 bg-nx-blue/5">
-            <Landmark size={14} className="text-nx-blue" strokeWidth={1.5} />
+          <div className="flex h-10 w-10 shrink-0 flex-col items-center justify-center gap-0.5 rounded-lg border border-bri-navy/20 bg-bri-bg">
+            <Landmark size={14} className="text-bri-navy" strokeWidth={1.5} />
           </div>
 
           {/* Data rows */}
@@ -99,17 +99,17 @@ export function SlikRetrievalCard({ status, slik }: SlikRetrievalCardProps) {
             <SlikRow
               label="Status"
               value={slik.status}
-              valueClassName="text-right text-[8.5px] font-semibold text-nx-ok"
+              valueClassName="text-right text-[8.5px] font-semibold text-emerald-600"
             />
           </div>
         </div>
       )}
 
-      {/* Score — always shown but faint when idle */}
+      {/* Score — shown when success */}
       {isSuccess && (
-        <div className="mt-1.5 flex items-baseline gap-1 border-t border-nx-line pt-1.5">
-          <span className="text-[9px] text-nx-muted">Score</span>
-          <span className="text-[20px] font-bold leading-none text-nx-blue">
+        <div className="mt-1.5 flex items-baseline gap-1 border-t border-bri-line pt-1.5">
+          <span className="text-[9px] text-bri-muted">Score</span>
+          <span className="text-[20px] font-bold leading-none text-bri-navy">
             {slik.score}
           </span>
         </div>

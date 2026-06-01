@@ -25,13 +25,13 @@ export function PersonaSelector({
   onReset,
 }: PersonaSelectorProps) {
   return (
-    <div className="flex w-[180px] shrink-0 flex-col rounded-xl border border-nx-line bg-white shadow-sm">
+    <div className="flex w-[180px] shrink-0 flex-col rounded-xl bg-white shadow-soft ring-1 ring-bri-line">
       {/* Section label */}
       <div className="px-2.5 pb-1 pt-2">
-        <span className="text-[9px] font-bold uppercase tracking-widest text-nx-muted">
+        <span className="text-[9px] font-semibold uppercase tracking-[0.12em] text-bri-muted">
           Custom Persona
         </span>
-        <p className="mt-0.5 text-[8px] leading-relaxed text-nx-muted/70">
+        <p className="mt-0.5 text-[8px] leading-relaxed text-bri-muted/70">
           Atur tipe penghasilan nasabah &amp; pasangan
         </p>
       </div>
@@ -40,18 +40,18 @@ export function PersonaSelector({
       <div className="flex flex-1 flex-col gap-2.5 px-2.5 pb-2.5">
         {/* Nasabah Utama */}
         <div className="flex flex-col gap-1">
-          <span className="text-[9px] font-semibold text-nx-ink">
+          <span className="text-[9px] font-semibold text-bri-ink">
             Nasabah Utama
           </span>
-          <div className="flex overflow-hidden rounded-lg border border-nx-line bg-gray-50 p-0.5 gap-0.5">
+          <div className="flex overflow-hidden rounded-lg border border-bri-line bg-bri-bg/60 p-0.5 gap-0.5">
             <button
               type="button"
               onClick={() => onSetNasabahPayroll(true)}
               className={cn(
                 "flex-1 rounded-md py-1 text-[9px] font-semibold transition-all",
                 persona.nasabahPayroll
-                  ? "bg-nx-blue text-white shadow-sm"
-                  : "text-nx-muted hover:text-nx-ink"
+                  ? "bg-bri-navy text-white shadow-sm"
+                  : "text-bri-muted hover:text-bri-ink"
               )}
             >
               Payroll
@@ -62,8 +62,8 @@ export function PersonaSelector({
               className={cn(
                 "flex-1 rounded-md py-1 text-[9px] font-semibold transition-all",
                 !persona.nasabahPayroll
-                  ? "bg-nx-blue text-white shadow-sm"
-                  : "text-nx-muted hover:text-nx-ink"
+                  ? "bg-bri-navy text-white shadow-sm"
+                  : "text-bri-muted hover:text-bri-ink"
               )}
             >
               Non-Payroll
@@ -73,18 +73,18 @@ export function PersonaSelector({
 
         {/* Pasangan */}
         <div className="flex flex-col gap-1">
-          <span className="text-[9px] font-semibold text-nx-ink">
+          <span className="text-[9px] font-semibold text-bri-ink">
             Pasangan
           </span>
-          <div className="flex overflow-hidden rounded-lg border border-nx-line bg-gray-50 p-0.5 gap-0.5">
+          <div className="flex overflow-hidden rounded-lg border border-bri-line bg-bri-bg/60 p-0.5 gap-0.5">
             <button
               type="button"
               onClick={() => onSetPasanganPayroll(true)}
               className={cn(
                 "flex-1 rounded-md py-1 text-[9px] font-semibold transition-all",
                 persona.pasanganPayroll
-                  ? "bg-nx-blue text-white shadow-sm"
-                  : "text-nx-muted hover:text-nx-ink"
+                  ? "bg-bri-navy text-white shadow-sm"
+                  : "text-bri-muted hover:text-bri-ink"
               )}
             >
               Payroll
@@ -95,8 +95,8 @@ export function PersonaSelector({
               className={cn(
                 "flex-1 rounded-md py-1 text-[9px] font-semibold transition-all",
                 !persona.pasanganPayroll
-                  ? "bg-nx-blue text-white shadow-sm"
-                  : "text-nx-muted hover:text-nx-ink"
+                  ? "bg-bri-navy text-white shadow-sm"
+                  : "text-bri-muted hover:text-bri-ink"
               )}
             >
               Non-Payroll
@@ -106,11 +106,11 @@ export function PersonaSelector({
       </div>
 
       {/* Reset Flow button */}
-      <div className="border-t border-nx-line px-2 py-1.5">
+      <div className="border-t border-bri-line px-2 py-1.5">
         <button
           type="button"
           onClick={onReset}
-          className="flex w-full items-center justify-center gap-1 rounded-lg py-1 text-[10px] font-medium text-nx-muted transition-colors hover:bg-gray-50 hover:text-nx-blue"
+          className="flex w-full items-center justify-center gap-1 rounded-lg py-1 text-[10px] font-medium text-bri-muted transition-colors hover:bg-bri-bg hover:text-bri-blue"
         >
           <RefreshCw size={10} />
           ↻ Reset Flow

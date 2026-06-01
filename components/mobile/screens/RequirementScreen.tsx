@@ -118,7 +118,7 @@ export function RequirementScreen({
   const hasAnyUploadSection = !nasabahPayroll || (isJoint && !pasanganPayroll);
 
   return (
-    <div className="flex flex-1 flex-col px-3 py-2 overflow-y-auto">
+    <div className="flex h-full min-h-0 flex-col overflow-y-auto scroll-thin px-3 py-2">
       {/* Title */}
       <div className="mb-2">
         <h2 className="text-[13px] font-bold text-bri-ink">Upload Dokumen</h2>

@@ -26,7 +26,7 @@ function FileRow({ label, targetPercent, ocrStatus }: FileRowProps) {
   const isDone = ocrStatus === "success";
 
   const barWidth = isIdle ? "0%" : isDone ? "100%" : `${targetPercent}%`;
-  const barColor = isDone ? "bg-nx-ok" : "bg-nx-blue";
+  const barColor = isDone ? "bg-emerald-500" : "bg-bri-blue";
 
   return (
     <div className="flex flex-col gap-0.5">
@@ -34,16 +34,16 @@ function FileRow({ label, targetPercent, ocrStatus }: FileRowProps) {
         <div className="flex items-center gap-1">
           <FileText
             size={10}
-            className={cn(isIdle ? "text-gray-300" : "text-nx-blue")}
+            className={cn(isIdle ? "text-bri-line" : "text-bri-blue")}
           />
-          <span className="text-[9px] font-medium text-nx-ink">{label}</span>
+          <span className="text-[9px] font-medium text-bri-ink">{label}</span>
         </div>
         <div className="flex items-center gap-1">
           {isRunning && (
-            <span className="text-[8px] text-nx-muted">Mengekstrak data…</span>
+            <span className="text-[8px] text-bri-muted">Mengekstrak data…</span>
           )}
           {isDone && (
-            <CheckCircle2 size={10} className="text-nx-ok" />
+            <CheckCircle2 size={10} className="text-emerald-500" />
           )}
         </div>
       </div>
@@ -63,7 +63,7 @@ function FileRow({ label, targetPercent, ocrStatus }: FileRowProps) {
 
       {/* Percent label */}
       <div className="flex justify-end">
-        <span className="text-[8px] text-nx-muted">
+        <span className="text-[8px] text-bri-muted">
           {isIdle ? "" : isDone ? "100%" : `${targetPercent}%`}
         </span>
       </div>
@@ -77,14 +77,14 @@ function FileRow({ label, targetPercent, ocrStatus }: FileRowProps) {
  */
 export function OcrProcessingCard({ ocrStatus }: OcrProcessingCardProps) {
   return (
-    <div className="flex flex-col rounded-xl border border-nx-line bg-white p-2 shadow-sm">
+    <div className="flex flex-col rounded-xl bg-white p-2 shadow-soft ring-1 ring-bri-line">
       {/* Section label */}
       <div className="mb-2 flex items-center gap-1">
-        <span className="text-[9px] font-bold uppercase tracking-widest text-nx-muted">
+        <span className="text-[9px] font-semibold uppercase tracking-[0.12em] text-bri-muted">
           OCR Processing
         </span>
         {ocrStatus === "running" && (
-          <span className="text-[8px] text-nx-blue">… Processing…</span>
+          <span className="text-[8px] text-bri-blue">… Processing…</span>
         )}
       </div>
 

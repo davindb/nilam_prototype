@@ -45,9 +45,9 @@ const NODE_ICONS: Record<NodeId, React.ComponentType<{ size?: number; className?
  */
 export function OrchestrationPipeline({ statusOf }: OrchestrationPipelineProps) {
   return (
-    <div className="rounded-xl border border-nx-line bg-white p-2 shadow-sm">
+    <div className="rounded-xl bg-white p-2 shadow-soft ring-1 ring-bri-line">
       {/* Section label */}
-      <span className="mb-2 block text-[9px] font-bold uppercase tracking-widest text-nx-muted">
+      <span className="mb-2 block text-[9px] font-semibold uppercase tracking-[0.12em] text-bri-muted">
         AI Orchestration Pipeline
       </span>
 
@@ -58,7 +58,7 @@ export function OrchestrationPipeline({ statusOf }: OrchestrationPipelineProps) 
           const Icon = NODE_ICONS[node.nodeId];
           const isLast = idx === PIPELINE_NODES.length - 1;
 
-          // Determine connector color: blue if this node and the next are done
+          // Determine connector color: bri-navy when done, gray otherwise
           const nextStatus = isLast ? "idle" : statusOf(PIPELINE_NODES[idx + 1].nodeId);
           const connectorActive =
             (status === "success") &&
@@ -73,7 +73,7 @@ export function OrchestrationPipeline({ statusOf }: OrchestrationPipelineProps) 
                   {/* Pulse ring for running */}
                   {status === "running" && (
                     <motion.div
-                      className="absolute inset-0 rounded-full bg-nx-blue/20"
+                      className="absolute inset-0 rounded-full bg-bri-navy/20"
                       animate={{ scale: [1, 1.6], opacity: [0.6, 0] }}
                       transition={{ duration: 1.2, repeat: Infinity, ease: "easeOut" }}
                     />
@@ -83,11 +83,11 @@ export function OrchestrationPipeline({ statusOf }: OrchestrationPipelineProps) 
                     className={cn(
                       "relative flex h-7 w-7 items-center justify-center rounded-full border-2 transition-colors",
                       status === "success" &&
-                        "border-nx-ok bg-nx-ok text-white",
+                        "border-emerald-500 bg-emerald-500 text-white",
                       status === "running" &&
-                        "border-nx-blue bg-nx-blue text-white",
+                        "border-bri-navy bg-bri-navy text-white",
                       status === "idle" &&
-                        "border-gray-300 bg-white text-gray-400"
+                        "border-bri-line bg-white text-bri-muted"
                     )}
                   >
                     {status === "success" ? (
@@ -102,9 +102,9 @@ export function OrchestrationPipeline({ statusOf }: OrchestrationPipelineProps) 
                 <span
                   className={cn(
                     "max-w-[52px] text-center text-[8px] leading-tight",
-                    status === "success" && "font-medium text-nx-ok",
-                    status === "running" && "font-semibold text-nx-blue",
-                    status === "idle" && "text-nx-muted"
+                    status === "success" && "font-medium text-emerald-600",
+                    status === "running" && "font-semibold text-bri-navy",
+                    status === "idle" && "text-bri-muted"
                   )}
                 >
                   {node.label}
@@ -116,7 +116,7 @@ export function OrchestrationPipeline({ statusOf }: OrchestrationPipelineProps) 
                 <div
                   className={cn(
                     "mx-0.5 h-[2px] flex-1 rounded-full transition-colors duration-300",
-                    connectorActive ? "bg-nx-blue" : "bg-gray-200"
+                    connectorActive ? "bg-bri-navy" : "bg-bri-line"
                   )}
                 />
               )}

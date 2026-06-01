@@ -6,7 +6,7 @@
  */
 export function ProcessingScreen() {
   return (
-    <div className="flex flex-1 flex-col items-center justify-center gap-3 px-4">
+    <div className="flex h-full min-h-0 flex-col items-center justify-center gap-3 px-4">
       {/* Animated spinner ring — BRI navy + sky */}
       <div className="relative flex h-14 w-14 items-center justify-center">
         {/* Outer track */}

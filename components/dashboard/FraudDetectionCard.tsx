@@ -28,9 +28,9 @@ export function FraudDetectionCard({ status, result }: FraudDetectionCardProps) 
     : idleScores;
 
   return (
-    <div className="flex flex-col rounded-xl border border-nx-line bg-white px-2.5 py-2 shadow-sm">
+    <div className="flex flex-col rounded-xl bg-white px-2.5 py-2 shadow-soft ring-1 ring-bri-line min-h-0">
       {/* Header label */}
-      <span className="mb-1.5 block text-[9px] font-bold uppercase tracking-widest text-nx-muted">
+      <span className="mb-1.5 block text-[9px] font-semibold uppercase tracking-[0.12em] text-bri-muted">
         Fraud Detection
       </span>
 
@@ -44,11 +44,11 @@ export function FraudDetectionCard({ status, result }: FraudDetectionCardProps) 
           <div className="flex flex-col gap-1">
             {["Slip Gaji", "Mutasi", "Konsistensi", "Pattern"].map((lbl) => (
               <div key={lbl} className="flex items-center gap-1">
-                <div className="h-1.5 w-1.5 rounded-full bg-gray-200" />
-                <span className="text-[9px] text-gray-300">{lbl}</span>
+                <div className="h-1.5 w-1.5 rounded-full bg-bri-line" />
+                <span className="text-[9px] text-bri-muted/40">{lbl}</span>
               </div>
             ))}
-            <p className="mt-1 text-[8px] italic text-gray-300">Menunggu…</p>
+            <p className="mt-1 text-[8px] italic text-bri-muted/40">Menunggu…</p>
           </div>
         </div>
       ) : (
@@ -64,27 +64,27 @@ export function FraudDetectionCard({ status, result }: FraudDetectionCardProps) 
                 <div className="flex items-center gap-1 min-w-0">
                   <CheckCircle2
                     size={9}
-                    className="shrink-0 text-nx-ok"
+                    className="shrink-0 text-emerald-500"
                     strokeWidth={2.5}
                   />
                   <span
                     className={cn(
-                      "truncate text-[9px] font-medium text-nx-ink",
+                      "truncate text-[9px] font-medium text-bri-ink",
                     )}
                   >
                     {check.name}
                   </span>
                 </div>
-                <span className="shrink-0 text-[9px] font-semibold text-nx-ok">
+                <span className="shrink-0 text-[9px] font-semibold text-emerald-600">
                   {Math.round(check.score * 100)}%
                 </span>
               </div>
             ))}
 
             {/* Overall confidence — prominent */}
-            <div className="mt-1.5 flex items-baseline gap-1 border-t border-nx-line pt-1.5">
-              <span className="text-[9px] text-nx-muted">Overall Confidence</span>
-              <span className="text-[18px] font-bold leading-none text-nx-ok">
+            <div className="mt-1.5 flex items-baseline gap-1 border-t border-bri-line pt-1.5">
+              <span className="text-[9px] text-bri-muted">Overall Confidence</span>
+              <span className="text-[18px] font-bold leading-none text-emerald-500">
                 {Math.round(result.overall * 100)}%
               </span>
             </div>

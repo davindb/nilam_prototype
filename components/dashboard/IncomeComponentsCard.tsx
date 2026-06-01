@@ -34,17 +34,17 @@ export function IncomeComponentsCard({
   return (
     <div
       className={cn(
-        "flex flex-col rounded-xl border border-nx-line bg-white px-2 py-1.5 shadow-sm",
+        "flex flex-col rounded-xl bg-white px-2 py-1.5 shadow-soft ring-1 ring-bri-line min-h-0",
         isStripped && !pending && "opacity-60",
       )}
     >
       {/* Header */}
       <div className="mb-1 flex items-center justify-between gap-1">
-        <span className="text-[8px] font-bold uppercase tracking-widest text-nx-muted leading-none">
+        <span className="text-[8px] font-semibold uppercase tracking-[0.12em] text-bri-muted leading-none">
           {title}
         </span>
         {isStripped && !pending && (
-          <span className="rounded-full bg-gray-100 px-1.5 py-0.5 text-[7px] font-semibold text-nx-muted">
+          <span className="rounded-pill bg-bri-bg px-1.5 py-0.5 text-[7px] font-semibold text-bri-muted">
             Non-Joint
           </span>
         )}
@@ -53,7 +53,7 @@ export function IncomeComponentsCard({
       {/* Pending state */}
       {pending ? (
         <div className="flex flex-1 items-center justify-center py-2">
-          <span className="text-[9px] italic text-gray-300">Menunggu ekstraksi…</span>
+          <span className="text-[9px] italic text-bri-muted/40">Menunggu ekstraksi…</span>
         </div>
       ) : (
         <>
@@ -61,11 +61,11 @@ export function IncomeComponentsCard({
           <table className="w-full border-collapse">
             <thead>
               <tr>
-                <th className="pb-0.5 text-left text-[7px] font-semibold uppercase text-nx-muted w-[18%]">Komponen</th>
-                <th className="pb-0.5 text-center text-[7px] font-semibold uppercase text-nx-muted w-[20%]">Mode</th>
-                <th className="pb-0.5 text-right text-[7px] font-semibold uppercase text-nx-muted w-[22%]">Nilai Dasar</th>
-                <th className="pb-0.5 text-center text-[7px] font-semibold uppercase text-nx-muted w-[22%]">Bobot</th>
-                <th className="pb-0.5 text-right text-[7px] font-semibold uppercase text-nx-muted w-[18%]">Adjusted</th>
+                <th className="pb-0.5 text-left text-[7px] font-semibold uppercase text-bri-muted w-[18%]">Komponen</th>
+                <th className="pb-0.5 text-center text-[7px] font-semibold uppercase text-bri-muted w-[20%]">Mode</th>
+                <th className="pb-0.5 text-right text-[7px] font-semibold uppercase text-bri-muted w-[22%]">Nilai Dasar</th>
+                <th className="pb-0.5 text-center text-[7px] font-semibold uppercase text-bri-muted w-[22%]">Bobot</th>
+                <th className="pb-0.5 text-right text-[7px] font-semibold uppercase text-bri-muted w-[18%]">Adjusted</th>
               </tr>
             </thead>
             <tbody>
@@ -73,9 +73,9 @@ export function IncomeComponentsCard({
                 const base = comp.mode === "avg" ? comp.avg : comp.min;
                 const adj = adjusted(comp);
                 return (
-                  <tr key={comp.key} className="border-t border-nx-line/50">
+                  <tr key={comp.key} className="border-t border-bri-line/50">
                     {/* Komponen */}
-                    <td className="py-0.5 pr-1 text-[9px] font-medium text-nx-ink">{comp.key}</td>
+                    <td className="py-0.5 pr-1 text-[9px] font-medium text-bri-ink">{comp.key}</td>
 
                     {/* Mode toggle */}
                     <td className="py-0.5 px-0.5">
@@ -88,8 +88,8 @@ export function IncomeComponentsCard({
                             className={cn(
                               "rounded px-1 py-0.5 text-[7px] font-semibold uppercase leading-none transition-colors",
                               comp.mode === m
-                                ? "bg-nx-blue text-white"
-                                : "bg-gray-100 text-nx-muted hover:bg-gray-200",
+                                ? "bg-bri-navy text-white"
+                                : "bg-bri-bg text-bri-muted hover:bg-bri-bg/80",
                               isStripped && "cursor-default",
                             )}
                           >
@@ -100,14 +100,14 @@ export function IncomeComponentsCard({
                     </td>
 
                     {/* Nilai Dasar */}
-                    <td className="py-0.5 text-right text-[8.5px] text-nx-ink pr-1">
+                    <td className="py-0.5 text-right text-[8.5px] text-bri-ink pr-1">
                       {isStripped ? "—" : formatRupiah(base)}
                     </td>
 
                     {/* Bobot */}
                     <td className="py-0.5 px-1">
                       {isStripped ? (
-                        <span className="block text-center text-[8.5px] text-nx-muted">—</span>
+                        <span className="block text-center text-[8.5px] text-bri-muted">—</span>
                       ) : (
                         <div className="flex items-center gap-0.5">
                           <input
@@ -117,9 +117,9 @@ export function IncomeComponentsCard({
                             step={0.05}
                             value={comp.weight}
                             onChange={(e) => onWeight(comp.key, parseFloat(e.target.value))}
-                            className="h-1.5 w-full cursor-pointer accent-[#2563EB]"
+                            className="h-1.5 w-full cursor-pointer accent-[#00529C]"
                           />
-                          <span className="w-6 shrink-0 text-right text-[7.5px] text-nx-muted">
+                          <span className="w-6 shrink-0 text-right text-[7.5px] text-bri-muted">
                             {comp.weight.toFixed(2)}
                           </span>
                         </div>
@@ -131,7 +131,7 @@ export function IncomeComponentsCard({
                       <span
                         className={cn(
                           "text-[9px] font-bold",
-                          isStripped ? "text-nx-muted" : "text-nx-blue",
+                          isStripped ? "text-bri-muted" : "text-bri-blue",
                         )}
                       >
                         {isStripped ? "—" : formatRupiah(adj)}
@@ -144,8 +144,8 @@ export function IncomeComponentsCard({
           </table>
 
           {/* Angsuran row */}
-          <div className="mt-1 flex items-center justify-between border-t border-nx-line pt-1">
-            <span className="text-[8px] font-medium text-nx-muted">
+          <div className="mt-1 flex items-center justify-between border-t border-bri-line pt-1">
+            <span className="text-[8px] font-medium text-bri-muted">
               Angsuran Bulanan (SLIK)
             </span>
             <span className="text-[9px] font-bold text-red-500">

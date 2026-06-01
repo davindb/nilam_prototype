@@ -56,19 +56,19 @@ function JsonBlock({
   const tokens = tokenize(data);
 
   return (
-    <div className="flex flex-1 flex-col min-w-0">
-      <span className="mb-1 block text-[9px] font-semibold text-nx-ink">
+    <div className="flex flex-1 flex-col min-w-0 min-h-0">
+      <span className="mb-1 block text-[9px] font-semibold text-bri-ink">
         {title}
       </span>
-      <div className="flex-1 overflow-auto rounded-lg bg-gray-50 px-2 py-1.5">
-        <pre className="text-[9px] leading-relaxed font-mono whitespace-pre-wrap break-words">
+      <div className="flex-1 min-h-0 overflow-y-auto scroll-thin rounded-lg bg-bri-bg/60 px-2 py-1.5">
+        <pre className="text-[9px] leading-[1.25] font-mono whitespace-pre-wrap break-words">
           {tokens.map((token, i) => (
             <span
               key={i}
               className={cn(
-                token.type === "key" && "text-nx-blue font-medium",
-                token.type === "number" && "text-nx-ok",
-                token.type === "punctuation" && "text-gray-500",
+                token.type === "key" && "text-bri-blue font-medium",
+                token.type === "number" && "text-emerald-600",
+                token.type === "punctuation" && "text-bri-muted",
                 token.type === "whitespace" && "text-transparent select-none"
               )}
             >
@@ -91,15 +91,15 @@ export function OcrJsonCard({ ocrStatus, slip, mutasi }: OcrJsonCardProps) {
   const isIdle = ocrStatus === "idle";
 
   return (
-    <div className="flex flex-1 flex-col rounded-xl border border-nx-line bg-white p-2 shadow-sm">
+    <div className="flex flex-1 flex-col rounded-xl bg-white p-2 shadow-soft ring-1 ring-bri-line min-h-0">
       {/* Section label */}
-      <span className="mb-2 block text-[9px] font-bold uppercase tracking-widest text-nx-muted">
+      <span className="mb-1.5 block text-[9px] font-semibold uppercase tracking-[0.12em] text-bri-muted">
         OCR Result (JSON)
       </span>
 
       {isIdle ? (
         <div className="flex flex-1 items-center justify-center">
-          <span className="text-[10px] text-gray-300 italic">Menunggu OCR…</span>
+          <span className="text-[10px] text-bri-muted/40 italic">Menunggu OCR…</span>
         </div>
       ) : (
         <div className="flex flex-1 gap-2 min-h-0">

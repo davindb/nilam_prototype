@@ -12,7 +12,7 @@ interface AnalystDecisionScreenProps {
  */
 export function AnalystDecisionScreen({ onRestart }: AnalystDecisionScreenProps) {
   return (
-    <div className="flex flex-1 flex-col items-center justify-center gap-3 px-5 py-4">
+    <div className="flex h-full min-h-0 flex-col items-center justify-center gap-3 px-5 py-3">
       {/* Success icon */}
       <div className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100">
         <CheckCircle2 size={32} className="text-emerald-500" strokeWidth={1.8} />

@@ -33,7 +33,7 @@ export function JointIncomeScreen({ onAnswer, onGoBack, canGoBack }: JointIncome
   ];
 
   return (
-    <div className="flex flex-1 flex-col px-4 py-3">
+    <div className="flex h-full min-h-0 flex-col overflow-y-auto scroll-thin px-4 py-3">
       {/* Title */}
       <div className="mb-3">
         <h2 className="text-sm font-bold text-bri-ink">Joint Income?</h2>

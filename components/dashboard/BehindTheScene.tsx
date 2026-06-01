@@ -54,10 +54,11 @@ export function BehindTheScene({
   const ocrStatus = statusOf("ocr");
 
   return (
-    <div className="flex h-full flex-col gap-2 overflow-hidden p-2">
-      {/* ── ROW A ─────────────────────────────────────────────────────────── */}
-      <div className="flex shrink-0 gap-2">
-        {/* Narrow left: persona selector */}
+    <div className="flex h-full min-h-0 flex-col gap-2 overflow-hidden p-2">
+
+      {/* ── ROW A — flex-[4]: Persona | Pipeline+OCR ──────────────────── */}
+      <div className="flex min-h-0 flex-[4] gap-2 overflow-hidden">
+        {/* Narrow left: persona selector — fixed width, full row height */}
         <PersonaSelector
           persona={persona}
           onSetNasabahPayroll={onSetNasabahPayroll}
@@ -65,17 +66,19 @@ export function BehindTheScene({
           onReset={onReset}
         />
 
-        {/* Right column: pipeline + OCR cards stacked */}
-        <div className="flex min-w-0 flex-1 flex-col gap-2">
-          {/* AI Orchestration Pipeline — full width */}
-          <OrchestrationPipeline statusOf={statusOf} />
+        {/* Right column: pipeline stacked above OCR row */}
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-2 overflow-hidden">
+          {/* AI Orchestration Pipeline — shrink-0: it's small, let it breathe */}
+          <div className="shrink-0">
+            <OrchestrationPipeline statusOf={statusOf} />
+          </div>
 
-          {/* OCR row: Processing (~40%) + JSON (~60%) */}
-          <div className="flex gap-2">
-            <div className="w-[40%] shrink-0">
+          {/* OCR row fills remaining height: Processing (~40%) + JSON (~60%) */}
+          <div className="flex min-h-0 flex-1 gap-2 overflow-hidden">
+            <div className="w-[40%] shrink-0 overflow-hidden">
               <OcrProcessingCard ocrStatus={ocrStatus} />
             </div>
-            <div className="flex min-w-0 flex-1">
+            <div className="flex min-h-0 min-w-0 flex-1 overflow-hidden">
               <OcrJsonCard
                 ocrStatus={ocrStatus}
                 slip={SLIP_GAJI}
@@ -86,8 +89,8 @@ export function BehindTheScene({
         </div>
       </div>
 
-      {/* ── ROW B — Fraud · Identity · SLIK ─────────────────────── */}
-      <div className="grid shrink-0 grid-cols-3 gap-2">
+      {/* ── ROW B — flex-[3]: Fraud · Identity · SLIK ───────────────── */}
+      <div className="grid min-h-0 flex-[3] grid-cols-3 gap-2 overflow-hidden">
         <FraudDetectionCard
           status={statusOf("fraud")}
           result={latest.get("fraud")?.output as FraudResult | undefined}
@@ -103,8 +106,8 @@ export function BehindTheScene({
         />
       </div>
 
-      {/* ── ROW C — Income Nasabah · THP · Income Pasangan ─────── */}
-      <div className="grid shrink-0 grid-cols-3 gap-2">
+      {/* ── ROW C — flex-[3]: Income Nasabah · THP · Income Pasangan ── */}
+      <div className="grid min-h-0 flex-[3] grid-cols-3 gap-2 overflow-hidden">
         <IncomeComponentsCard
           title="INCOME COMPONENTS - NASABAH"
           income={nasabah}

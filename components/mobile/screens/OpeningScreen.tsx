@@ -18,18 +18,18 @@ export function OpeningScreen({ onStart, personaSelected = true }: OpeningScreen
   const enabled = personaSelected;
 
   return (
-    <div className="flex flex-1 flex-col items-center justify-center gap-4 px-5 py-4">
+    <div className="flex h-full min-h-0 flex-col items-center justify-center gap-3 px-5 py-3">
       {/* Logo mark — BRI navy→sky gradient */}
       <div
-        className="flex h-14 w-14 items-center justify-center rounded-2xl shadow-soft"
+        className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl shadow-soft"
         style={{
           background: "linear-gradient(135deg, #00529C 0%, #4FB3E8 100%)",
         }}
         aria-hidden="true"
       >
         <svg
-          width="28"
-          height="28"
+          width="24"
+          height="24"
           viewBox="0 0 18 18"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
@@ -49,7 +49,7 @@ export function OpeningScreen({ onStart, personaSelected = true }: OpeningScreen
 
       {/* Wordmark */}
       <div className="text-center">
-        <p className="text-xl font-bold tracking-widest text-bri-ink">NILAM</p>
+        <p className="text-lg font-bold tracking-widest text-bri-ink">NILAM</p>
         <p className="mt-0.5 text-[10px] text-bri-muted">New Intelligent Loan Application</p>
       </div>
 
@@ -59,13 +59,13 @@ export function OpeningScreen({ onStart, personaSelected = true }: OpeningScreen
       </p>
 
       {/* Mulai button — BRI navy gradient */}
-      <div className="w-full">
+      <div className="w-full shrink-0">
         <button
           type="button"
           onClick={enabled ? onStart : undefined}
           disabled={!enabled}
           className={cn(
-            "w-full rounded-bubble py-2.5 text-sm font-semibold text-white transition-all",
+            "w-full rounded-bubble py-2 text-sm font-semibold text-white transition-all",
             enabled
               ? "cursor-pointer hover:opacity-90 active:scale-[0.98]"
               : "cursor-not-allowed opacity-50"
