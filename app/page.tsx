@@ -6,9 +6,11 @@ import { PhoneFrame } from "@/components/phone/PhoneFrame";
 import { BackButton } from "@/components/phone/ui/BackButton";
 import { OpeningScreen } from "@/components/phone/screens/OpeningScreen";
 import { IncomeTypeScreen } from "@/components/phone/screens/IncomeTypeScreen";
-import { PayrollConfirmScreen } from "@/components/phone/screens/PayrollConfirmScreen";
-import { DocumentUploadScreen } from "@/components/phone/screens/DocumentUploadScreen";
-import { JointDocumentScreen } from "@/components/phone/screens/JointDocumentScreen";
+import { JointIncomeScreen } from "@/components/phone/screens/JointIncomeScreen";
+import { RequirementNasabahScreen } from "@/components/phone/screens/RequirementNasabahScreen";
+import { SpouseIdentityScreen } from "@/components/phone/screens/SpouseIdentityScreen";
+import { SpouseConfirmScreen } from "@/components/phone/screens/SpouseConfirmScreen";
+import { SpouseIncomeScreen } from "@/components/phone/screens/SpouseIncomeScreen";
 import { ProcessingScreen } from "@/components/phone/screens/ProcessingScreen";
 import { SubmittedScreen } from "@/components/phone/screens/SubmittedScreen";
 import { BehindTheScenePanel } from "@/components/orchestration/BehindTheScenePanel";
@@ -29,6 +31,7 @@ export default function Page() {
     persona,
     steps,
     currentStep,
+    stepIndex,
     canGoBack,
     uploads,
     events,
@@ -44,6 +47,11 @@ export default function Page() {
     setComponentMode,
     setComponentWeight,
   } = useNilamFlow();
+
+  // Derive whether this is the last input step (next step is "processing")
+  const isLast = steps[stepIndex + 1] === "processing";
+  const proceed = isLast ? submit : next;
+  const proceedLabel = isLast ? "Ajukan Aplikasi" : "Lanjutkan";
 
   // -------------------------------------------------------------------------
   // Phone: screen switcher
@@ -81,10 +89,10 @@ export default function Page() {
           </motion.div>
         );
 
-      case "payroll_confirm":
+      case "joint_income":
         return (
           <motion.div
-            key="payroll_confirm"
+            key="joint_income"
             className="flex flex-1 flex-col overflow-hidden"
             variants={slideVariants}
             initial="initial"
@@ -92,14 +100,14 @@ export default function Page() {
             exit="exit"
             transition={slideTransition}
           >
-            <PayrollConfirmScreen onConfirm={submit} />
+            <JointIncomeScreen isJoint={!!persona?.isJointIncome} onProceed={next} />
           </motion.div>
         );
 
-      case "document_upload":
+      case "requirement_nasabah":
         return (
           <motion.div
-            key="document_upload"
+            key="requirement_nasabah"
             className="flex flex-1 flex-col overflow-hidden"
             variants={slideVariants}
             initial="initial"
@@ -107,21 +115,20 @@ export default function Page() {
             exit="exit"
             transition={slideTransition}
           >
-            <DocumentUploadScreen
+            <RequirementNasabahScreen
+              isPayroll={!!persona?.isPayrollBRI}
               uploads={uploads}
               onUpload={setUpload}
-              onSubmit={persona?.isJointIncome ? next : submit}
-              submitLabel={
-                persona?.isJointIncome ? "Lanjut ke Dokumen Pasangan" : "Ajukan Aplikasi"
-              }
+              onProceed={proceed}
+              proceedLabel={proceedLabel}
             />
           </motion.div>
         );
 
-      case "joint_documents":
+      case "spouse_identity":
         return (
           <motion.div
-            key="joint_documents"
+            key="spouse_identity"
             className="flex flex-1 flex-col overflow-hidden"
             variants={slideVariants}
             initial="initial"
@@ -129,11 +136,46 @@ export default function Page() {
             exit="exit"
             transition={slideTransition}
           >
-            <JointDocumentScreen
+            <SpouseIdentityScreen
               uploads={uploads}
               onUpload={setUpload}
               onCapture={() => setUpload("selfie")}
-              onSubmit={submit}
+              onProceed={next}
+            />
+          </motion.div>
+        );
+
+      case "spouse_confirm":
+        return (
+          <motion.div
+            key="spouse_confirm"
+            className="flex flex-1 flex-col overflow-hidden"
+            variants={slideVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            transition={slideTransition}
+          >
+            <SpouseConfirmScreen onProceed={submit} proceedLabel="Ajukan Aplikasi" />
+          </motion.div>
+        );
+
+      case "spouse_income":
+        return (
+          <motion.div
+            key="spouse_income"
+            className="flex flex-1 flex-col overflow-hidden"
+            variants={slideVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            transition={slideTransition}
+          >
+            <SpouseIncomeScreen
+              uploads={uploads}
+              onUpload={setUpload}
+              onProceed={submit}
+              proceedLabel="Ajukan Aplikasi"
             />
           </motion.div>
         );
