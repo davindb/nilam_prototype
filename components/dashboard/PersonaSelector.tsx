@@ -1,6 +1,6 @@
 "use client";
 
-import { RefreshCw } from "lucide-react";
+import { Info, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/cn";
 
 interface PersonaSelectorProps {
@@ -102,6 +102,14 @@ export function PersonaSelector({
               Non-Payroll
             </button>
           </div>
+        </div>
+
+        {/* Active-scenario note — fills the column cleanly, no empty bottom */}
+        <div className="mt-auto flex items-start gap-1.5 rounded-lg bg-bri-bg/70 p-2">
+          <Info size={11} className="mt-px shrink-0 text-bri-blue" />
+          <p className="text-[8px] leading-relaxed text-bri-muted">
+            Tipe <span className="font-semibold text-bri-ink">Joint Income</span> dipilih nasabah di aplikasi mobile.
+          </p>
         </div>
       </div>
 
