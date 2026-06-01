@@ -29,7 +29,8 @@ const slideTransition = { duration: 0.22, ease: "easeInOut" };
 // ─── Props ───────────────────────────────────────────────────────────────────
 
 interface MobileAppProps {
-  persona: PersonaConfig | null;
+  persona: PersonaConfig;
+  isJoint: boolean;
   currentStep: FlowStep;
   canGoBack: boolean;
   uploads: Record<string, boolean>;
@@ -37,6 +38,7 @@ interface MobileAppProps {
   next: () => void;
   goBack: () => void;
   setUpload: (key: string) => void;
+  setJointAnswer: (ans: "ya" | "tidak") => void;
   submit: () => void;
   reset: () => void;
 }
@@ -49,6 +51,7 @@ interface MobileAppProps {
  */
 export function MobileApp({
   persona,
+  isJoint,
   currentStep,
   canGoBack,
   uploads,
@@ -56,6 +59,7 @@ export function MobileApp({
   next,
   goBack,
   setUpload,
+  setJointAnswer,
   submit,
   reset,
 }: MobileAppProps) {
@@ -78,7 +82,7 @@ export function MobileApp({
         return (
           <OpeningScreen
             key="opening"
-            personaSelected={!!persona}
+            personaSelected={true}
             onStart={start}
           />
         );
@@ -95,8 +99,10 @@ export function MobileApp({
         return (
           <JointIncomeScreen
             key="joint_income"
-            isJoint={!!persona?.isJointIncome}
-            onProceed={next}
+            onAnswer={(ans) => {
+              setJointAnswer(ans);
+              next();
+            }}
             onGoBack={goBack}
             canGoBack={canGoBack}
           />
@@ -105,6 +111,9 @@ export function MobileApp({
         return (
           <RequirementScreen
             key="requirement"
+            nasabahPayroll={persona.nasabahPayroll}
+            isJoint={isJoint}
+            pasanganPayroll={persona.pasanganPayroll}
             uploads={uploads}
             onUpload={setUpload}
             onSubmit={handleSubmit}
@@ -123,7 +132,7 @@ export function MobileApp({
         return (
           <OpeningScreen
             key="opening-fallback"
-            personaSelected={!!persona}
+            personaSelected={true}
             onStart={start}
           />
         );

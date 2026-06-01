@@ -2,26 +2,26 @@
 
 import { RefreshCw } from "lucide-react";
 import { cn } from "@/lib/cn";
-import type { PersonaConfig } from "@/types/flow";
 
 interface PersonaSelectorProps {
-  personas: PersonaConfig[];
-  activePersonaId: string | null;
-  onSelect: (id: string) => void;
+  persona: { nasabahPayroll: boolean; pasanganPayroll: boolean };
+  onSetNasabahPayroll: (v: boolean) => void;
+  onSetPasanganPayroll: (v: boolean) => void;
   onReset: () => void;
 }
 
 /**
  * PersonaSelector — narrow left strip of the "Behind The Scene" dashboard.
  *
- * Renders 4 persona rows (numbered badge 1–4) + a "Reset Flow" button.
- * Active persona gets a filled blue badge and a blue ring/tint background.
- * Matches reference strips in r1_pipeline.png and r2_ocr.png.
+ * Two segmented toggle groups:
+ *   - Nasabah Utama: Payroll | Non-Payroll
+ *   - Pasangan:      Payroll | Non-Payroll
+ * + Reset Flow button at the bottom.
  */
 export function PersonaSelector({
-  personas,
-  activePersonaId,
-  onSelect,
+  persona,
+  onSetNasabahPayroll,
+  onSetPasanganPayroll,
   onReset,
 }: PersonaSelectorProps) {
   return (
@@ -29,71 +29,91 @@ export function PersonaSelector({
       {/* Section label */}
       <div className="px-2.5 pb-1 pt-2">
         <span className="text-[9px] font-bold uppercase tracking-widest text-nx-muted">
-          Persona Selector
+          Custom Persona
         </span>
+        <p className="mt-0.5 text-[8px] leading-relaxed text-nx-muted/70">
+          Atur tipe penghasilan nasabah &amp; pasangan
+        </p>
       </div>
 
-      {/* Persona list */}
-      <div className="flex flex-1 flex-col gap-1 px-2 pb-2">
-        {personas.map((persona, idx) => {
-          const isActive = persona.id === activePersonaId;
-          // Split label on "·" to get two lines, e.g. "Payroll BRI" / "Non Joint Income"
-          const parts = persona.label.split("·").map((s) => s.trim());
-          const line1 = parts[0] ?? persona.label;
-          const line2 = parts[1] ?? "";
-
-          return (
+      {/* Toggle groups */}
+      <div className="flex flex-1 flex-col gap-2.5 px-2.5 pb-2.5">
+        {/* Nasabah Utama */}
+        <div className="flex flex-col gap-1">
+          <span className="text-[9px] font-semibold text-nx-ink">
+            Nasabah Utama
+          </span>
+          <div className="flex overflow-hidden rounded-lg border border-nx-line bg-gray-50 p-0.5 gap-0.5">
             <button
-              key={persona.id}
-              onClick={() => onSelect(persona.id)}
+              type="button"
+              onClick={() => onSetNasabahPayroll(true)}
               className={cn(
-                "flex items-center gap-1.5 rounded-lg px-1.5 py-1.5 text-left transition-colors",
-                isActive
-                  ? "bg-blue-50 ring-1 ring-nx-blue/30"
-                  : "hover:bg-gray-50"
+                "flex-1 rounded-md py-1 text-[9px] font-semibold transition-all",
+                persona.nasabahPayroll
+                  ? "bg-nx-blue text-white shadow-sm"
+                  : "text-nx-muted hover:text-nx-ink"
               )}
             >
-              {/* Numbered badge */}
-              <span
-                className={cn(
-                  "flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold",
-                  isActive
-                    ? "bg-nx-blue text-white"
-                    : "bg-gray-200 text-nx-muted"
-                )}
-              >
-                {idx + 1}
-              </span>
-
-              {/* Two-line label */}
-              <span className="min-w-0 leading-tight">
-                <span
-                  className={cn(
-                    "block truncate text-[10px] font-semibold",
-                    isActive ? "text-nx-blue" : "text-nx-ink"
-                  )}
-                >
-                  {line1}
-                </span>
-                {line2 && (
-                  <span className="block truncate text-[9px] text-nx-muted">
-                    {line2}
-                  </span>
-                )}
-              </span>
+              Payroll
             </button>
-          );
-        })}
+            <button
+              type="button"
+              onClick={() => onSetNasabahPayroll(false)}
+              className={cn(
+                "flex-1 rounded-md py-1 text-[9px] font-semibold transition-all",
+                !persona.nasabahPayroll
+                  ? "bg-nx-blue text-white shadow-sm"
+                  : "text-nx-muted hover:text-nx-ink"
+              )}
+            >
+              Non-Payroll
+            </button>
+          </div>
+        </div>
+
+        {/* Pasangan */}
+        <div className="flex flex-col gap-1">
+          <span className="text-[9px] font-semibold text-nx-ink">
+            Pasangan
+          </span>
+          <div className="flex overflow-hidden rounded-lg border border-nx-line bg-gray-50 p-0.5 gap-0.5">
+            <button
+              type="button"
+              onClick={() => onSetPasanganPayroll(true)}
+              className={cn(
+                "flex-1 rounded-md py-1 text-[9px] font-semibold transition-all",
+                persona.pasanganPayroll
+                  ? "bg-nx-blue text-white shadow-sm"
+                  : "text-nx-muted hover:text-nx-ink"
+              )}
+            >
+              Payroll
+            </button>
+            <button
+              type="button"
+              onClick={() => onSetPasanganPayroll(false)}
+              className={cn(
+                "flex-1 rounded-md py-1 text-[9px] font-semibold transition-all",
+                !persona.pasanganPayroll
+                  ? "bg-nx-blue text-white shadow-sm"
+                  : "text-nx-muted hover:text-nx-ink"
+              )}
+            >
+              Non-Payroll
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Reset Flow button */}
       <div className="border-t border-nx-line px-2 py-1.5">
         <button
+          type="button"
           onClick={onReset}
           className="flex w-full items-center justify-center gap-1 rounded-lg py-1 text-[10px] font-medium text-nx-muted transition-colors hover:bg-gray-50 hover:text-nx-blue"
         >
           <RefreshCw size={10} />
-          Reset Flow
+          ↻ Reset Flow
         </button>
       </div>
     </div>

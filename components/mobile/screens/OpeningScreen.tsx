@@ -3,15 +3,20 @@
 import { cn } from "@/lib/cn";
 
 interface OpeningScreenProps {
-  personaSelected: boolean;
   onStart: () => void;
+  /** Optional override — defaults to true since persona always exists now */
+  personaSelected?: boolean;
 }
 
 /**
  * Opening screen — centered NILAM logo + brand mark + tagline + "Mulai" button.
  * Compact: fits within ~300px screen height with no scroll.
+ *
+ * personaSelected defaults to true since a default persona always exists.
  */
-export function OpeningScreen({ personaSelected, onStart }: OpeningScreenProps) {
+export function OpeningScreen({ onStart, personaSelected = true }: OpeningScreenProps) {
+  const enabled = personaSelected;
+
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-4 px-5 py-4">
       {/* Logo mark */}
@@ -57,27 +62,22 @@ export function OpeningScreen({ personaSelected, onStart }: OpeningScreenProps) 
       <div className="w-full">
         <button
           type="button"
-          onClick={personaSelected ? onStart : undefined}
-          disabled={!personaSelected}
+          onClick={enabled ? onStart : undefined}
+          disabled={!enabled}
           className={cn(
             "w-full rounded-full py-2.5 text-sm font-semibold text-white transition-all",
-            personaSelected
+            enabled
               ? "cursor-pointer hover:opacity-90 active:scale-[0.98]"
               : "cursor-not-allowed opacity-50"
           )}
           style={{
-            background: personaSelected
+            background: enabled
               ? "linear-gradient(90deg, #2563EB 0%, #4F46E5 100%)"
               : "linear-gradient(90deg, #94A3B8 0%, #94A3B8 100%)",
           }}
         >
           Mulai
         </button>
-        {!personaSelected && (
-          <p className="mt-1.5 text-center text-[9px] text-nx-muted">
-            Pilih persona terlebih dahulu
-          </p>
-        )}
       </div>
     </div>
   );

@@ -1,7 +1,6 @@
 "use client";
 
 import { useOrchestrationFeed } from "@/hooks/useOrchestrationFeed";
-import { PERSONAS } from "@/data/personas";
 import { SLIP_GAJI, MUTASI } from "@/data/ocrFixtures";
 import type { PersonaConfig, FlowStep } from "@/types/flow";
 import type { OrchestrationEvent } from "@/types/orchestration";
@@ -18,12 +17,14 @@ import { IncomeComponentsCard } from "./IncomeComponentsCard";
 import { ThpEngineCard } from "./ThpEngineCard";
 
 interface BehindTheSceneProps {
-  persona: PersonaConfig | null;
-  currentStep: FlowStep;
+  persona: PersonaConfig;
+  isJoint: boolean;
+  currentStep?: FlowStep;
   events: OrchestrationEvent[];
   nasabah: CustomerIncome | undefined;
   pasangan: CustomerIncome | undefined;
-  onSelectPersona: (id: string) => void;
+  onSetNasabahPayroll: (v: boolean) => void;
+  onSetPasanganPayroll: (v: boolean) => void;
   onReset: () => void;
   setComponentMode: (role: "nasabah" | "pasangan", key: ComponentKey, mode: ComponentMode) => void;
   setComponentWeight: (role: "nasabah" | "pasangan", key: ComponentKey, weight: number) => void;
@@ -34,15 +35,17 @@ interface BehindTheSceneProps {
  *
  * Fixed, no-scroll grid composed of three rows:
  *   ROW A: PersonaSelector | [OrchestrationPipeline / OCR cards]
- *   ROW B: Fraud · Identity · SLIK placeholders (Pass 5)
- *   ROW C: Income Nasabah · THP · Income Pasangan placeholders (Pass 6)
+ *   ROW B: Fraud · Identity · SLIK
+ *   ROW C: Income Nasabah · THP · Income Pasangan
  */
 export function BehindTheScene({
   persona,
+  isJoint,
   events,
   nasabah,
   pasangan,
-  onSelectPersona,
+  onSetNasabahPayroll,
+  onSetPasanganPayroll,
   onReset,
   setComponentMode,
   setComponentWeight,
@@ -56,9 +59,9 @@ export function BehindTheScene({
       <div className="flex shrink-0 gap-2">
         {/* Narrow left: persona selector */}
         <PersonaSelector
-          personas={PERSONAS}
-          activePersonaId={persona?.id ?? null}
-          onSelect={onSelectPersona}
+          persona={persona}
+          onSetNasabahPayroll={onSetNasabahPayroll}
+          onSetPasanganPayroll={onSetPasanganPayroll}
           onReset={onReset}
         />
 
@@ -83,7 +86,7 @@ export function BehindTheScene({
         </div>
       </div>
 
-      {/* ── ROW B — Fraud · Identity · SLIK (Pass 5) ─────────────────────── */}
+      {/* ── ROW B — Fraud · Identity · SLIK ─────────────────────── */}
       <div className="grid shrink-0 grid-cols-3 gap-2">
         <FraudDetectionCard
           status={statusOf("fraud")}
@@ -92,7 +95,7 @@ export function BehindTheScene({
         <IdentityCheckCard
           status={statusOf("identity")}
           identity={latest.get("identity")?.output as IdentityResult | null | undefined}
-          isJoint={!!persona?.isJointIncome}
+          isJoint={isJoint}
         />
         <SlikRetrievalCard
           status={statusOf("slik")}
@@ -100,7 +103,7 @@ export function BehindTheScene({
         />
       </div>
 
-      {/* ── ROW C — Income Nasabah · THP · Income Pasangan (Pass 6) ─────── */}
+      {/* ── ROW C — Income Nasabah · THP · Income Pasangan ─────── */}
       <div className="grid shrink-0 grid-cols-3 gap-2">
         <IncomeComponentsCard
           title="INCOME COMPONENTS - NASABAH"
@@ -111,12 +114,12 @@ export function BehindTheScene({
         <ThpEngineCard
           nasabah={nasabah}
           pasangan={pasangan}
-          isJoint={!!persona?.isJointIncome}
+          isJoint={isJoint}
         />
         <IncomeComponentsCard
           title="INCOME COMPONENTS - PASANGAN"
           income={pasangan}
-          stripped={!persona?.isJointIncome}
+          stripped={!isJoint}
           onMode={(k, m) => setComponentMode("pasangan", k, m)}
           onWeight={(k, w) => setComponentWeight("pasangan", k, w)}
         />

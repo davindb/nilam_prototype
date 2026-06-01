@@ -6,36 +6,60 @@ import { BehindTheScene } from "@/components/dashboard/BehindTheScene";
 import { useNilamFlow } from "@/hooks/useNilamFlow";
 
 export default function Page() {
-  const flow = useNilamFlow();
+  const {
+    persona,
+    isJoint,
+    currentStep,
+    canGoBack,
+    uploads,
+    events,
+    nasabah,
+    pasangan,
+    setNasabahPayroll,
+    setPasanganPayroll,
+    setJointAnswer,
+    start,
+    next,
+    goBack,
+    setUpload,
+    submit,
+    setComponentMode,
+    setComponentWeight,
+    reset,
+  } = useNilamFlow();
 
   return (
     <AppShell
-      onReset={flow.reset}
+      onReset={reset}
       mobile={
         <MobileApp
-          persona={flow.persona}
-          currentStep={flow.currentStep}
-          canGoBack={flow.canGoBack}
-          uploads={flow.uploads}
-          start={flow.start}
-          next={flow.next}
-          goBack={flow.goBack}
-          setUpload={flow.setUpload}
-          submit={flow.submit}
-          reset={flow.reset}
+          persona={persona}
+          isJoint={isJoint}
+          currentStep={currentStep}
+          canGoBack={canGoBack}
+          uploads={uploads}
+          start={start}
+          next={next}
+          goBack={goBack}
+          setUpload={setUpload}
+          setJointAnswer={setJointAnswer}
+          submit={submit}
+          reset={reset}
         />
       }
       dashboard={
         <BehindTheScene
-          persona={flow.persona}
-          currentStep={flow.currentStep}
-          events={flow.events}
-          nasabah={flow.nasabah}
-          pasangan={flow.pasangan}
-          onSelectPersona={flow.selectPersona}
-          onReset={flow.reset}
-          setComponentMode={flow.setComponentMode}
-          setComponentWeight={flow.setComponentWeight}
+          persona={persona}
+          isJoint={isJoint}
+          currentStep={currentStep}
+          events={events}
+          nasabah={nasabah}
+          pasangan={pasangan}
+          onSetNasabahPayroll={setNasabahPayroll}
+          onSetPasanganPayroll={setPasanganPayroll}
+          onReset={reset}
+          setComponentMode={setComponentMode}
+          setComponentWeight={setComponentWeight}
         />
       }
     />

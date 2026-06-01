@@ -1,43 +1,34 @@
 "use client";
 
-import { useState } from "react";
 import { Users, User } from "lucide-react";
 import { cn } from "@/lib/cn";
 
 interface JointIncomeScreenProps {
-  isJoint: boolean;
-  onProceed: () => void;
+  onAnswer: (ans: "ya" | "tidak") => void;
   onGoBack?: () => void;
   canGoBack?: boolean;
 }
 
 /**
  * Joint Income screen — two option cards.
- * The card matching `isJoint` triggers onProceed.
- * The non-matching card shows a gentle hint "Pilih sesuai persona".
+ * Both cards are always selectable (free runtime choice).
+ * Clicking either calls onAnswer("ya") or onAnswer("tidak") and advances.
  */
-export function JointIncomeScreen({ isJoint, onProceed, onGoBack, canGoBack }: JointIncomeScreenProps) {
-  const [shakeWrong, setShakeWrong] = useState(false);
-
-  function handleWrongPick() {
-    setShakeWrong(true);
-    setTimeout(() => setShakeWrong(false), 500);
-  }
-
+export function JointIncomeScreen({ onAnswer, onGoBack, canGoBack }: JointIncomeScreenProps) {
   const cards = [
     {
-      key: "joint",
+      key: "joint" as const,
       icon: <Users size={16} />,
       label: "Ya, Joint Income",
       desc: "Penghasilan digabungkan dengan pasangan",
-      matchesPersona: isJoint,
+      answer: "ya" as const,
     },
     {
-      key: "single",
+      key: "single" as const,
       icon: <User size={16} />,
       label: "Tidak, Penghasilan Sendiri",
       desc: "Penghasilan hanya dari nasabah",
-      matchesPersona: !isJoint,
+      answer: "tidak" as const,
     },
   ];
 
@@ -55,44 +46,22 @@ export function JointIncomeScreen({ isJoint, onProceed, onGoBack, canGoBack }: J
           <button
             key={card.key}
             type="button"
-            onClick={card.matchesPersona ? onProceed : handleWrongPick}
+            onClick={() => onAnswer(card.answer)}
             className={cn(
               "flex w-full items-center gap-3 rounded-xl border-2 p-3 text-left transition-all active:scale-[0.98]",
-              card.matchesPersona
-                ? "border-nx-blue bg-blue-50 hover:bg-blue-100"
-                : "border-gray-200 bg-white hover:border-gray-300",
-              !card.matchesPersona && shakeWrong && "animate-[shake_0.4s_ease-in-out]"
+              "border-nx-line bg-white hover:border-nx-blue hover:bg-blue-50"
             )}
           >
-            <div
-              className={cn(
-                "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg",
-                card.matchesPersona ? "bg-nx-blue text-white" : "bg-gray-100 text-gray-400"
-              )}
-            >
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-500 transition-colors group-hover:bg-nx-blue group-hover:text-white">
               {card.icon}
             </div>
             <div className="flex-1">
-              <p
-                className={cn(
-                  "text-[11px] font-bold",
-                  card.matchesPersona ? "text-nx-ink" : "text-gray-500"
-                )}
-              >
-                {card.label}
-              </p>
+              <p className="text-[11px] font-bold text-nx-ink">{card.label}</p>
               <p className="text-[9px] text-nx-muted">{card.desc}</p>
             </div>
           </button>
         ))}
       </div>
-
-      {/* Wrong-pick hint */}
-      {shakeWrong && (
-        <p className="mt-1 text-center text-[9px] text-amber-500">
-          Pilih sesuai persona
-        </p>
-      )}
 
       {/* Back */}
       {canGoBack && (
