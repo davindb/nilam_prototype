@@ -13,6 +13,17 @@ const config: Config = {
         nilam: {
           ok: "#10B981", warn: "#F59E0B", run: "#1A6FC4", glow: "#4FB3E8",
         },
+        nx: {
+          blue:   "#2563EB",  // royal blue — primary brand (matches reference header logo + titles)
+          indigo: "#4F46E5",  // indigo — logo gradient end
+          bg:     "#F1F5F9",  // soft slate page background
+          card:   "#FFFFFF",  // white card surface
+          line:   "#E5E7EB",  // subtle border / divider
+          ink:    "#0F172A",  // near-black text
+          muted:  "#64748B",  // secondary / gray text
+          ok:     "#16A34A",  // green success (status pills)
+          okLight:"#DCFCE7",  // green pill background
+        },
       },
       fontFamily: { sans: ["var(--font-inter)", "system-ui", "sans-serif"] },
       borderRadius: { card: "16px", bubble: "14px", pill: "999px" },
