@@ -5,10 +5,14 @@ import { PERSONAS } from "@/data/personas";
 import { SLIP_GAJI, MUTASI } from "@/data/ocrFixtures";
 import type { PersonaConfig, FlowStep } from "@/types/flow";
 import type { OrchestrationEvent } from "@/types/orchestration";
+import type { FraudResult, IdentityResult, SlikResult } from "@/types/engines";
 import { PersonaSelector } from "./PersonaSelector";
 import { OrchestrationPipeline } from "./OrchestrationPipeline";
 import { OcrProcessingCard } from "./OcrProcessingCard";
 import { OcrJsonCard } from "./OcrJsonCard";
+import { FraudDetectionCard } from "./FraudDetectionCard";
+import { IdentityCheckCard } from "./IdentityCheckCard";
+import { SlikRetrievalCard } from "./SlikRetrievalCard";
 
 interface BehindTheSceneProps {
   persona: PersonaConfig | null;
@@ -32,7 +36,7 @@ export function BehindTheScene({
   onSelectPersona,
   onReset,
 }: BehindTheSceneProps) {
-  const { statusOf } = useOrchestrationFeed(events);
+  const { latest, statusOf } = useOrchestrationFeed(events);
   const ocrStatus = statusOf("ocr");
 
   return (
@@ -70,11 +74,19 @@ export function BehindTheScene({
 
       {/* ── ROW B — Fraud · Identity · SLIK (Pass 5) ─────────────────────── */}
       <div className="grid shrink-0 grid-cols-3 gap-2">
-        {(["Fraud Detection", "Identity Check", "SLIK Retrieval"] as const).map(
-          (label) => (
-            <PlaceholderCard key={label} label={label} pass={5} />
-          )
-        )}
+        <FraudDetectionCard
+          status={statusOf("fraud")}
+          result={latest.get("fraud")?.output as FraudResult | undefined}
+        />
+        <IdentityCheckCard
+          status={statusOf("identity")}
+          identity={latest.get("identity")?.output as IdentityResult | null | undefined}
+          isJoint={!!persona?.isJointIncome}
+        />
+        <SlikRetrievalCard
+          status={statusOf("slik")}
+          slik={latest.get("slik")?.output as SlikResult | undefined}
+        />
       </div>
 
       {/* ── ROW C — Income · THP (Pass 6) ────────────────────────────────── */}
