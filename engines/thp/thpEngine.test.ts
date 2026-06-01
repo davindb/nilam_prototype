@@ -38,10 +38,10 @@ describe("computeJointThp", () => {
   it("total = nasabah.thp + pasangan.thp", () => {
     const p: CustomerIncome = { ...nasabah(), role: "pasangan", name: "Pasangan", angsuran: 1_500_000 };
     const r = computeJointThp(nasabah(), p);
-    expect(r.total).toBe(r.nasabah.thp + (r.pasangan?.thp ?? 0));
+    expect(r.total).toBe(118_000_000);
   });
   it("total = nasabah.thp when no pasangan", () => {
     const r = computeJointThp(nasabah());
-    expect(r.total).toBe(r.nasabah.thp);
+    expect(r.total).toBe(58_500_000);
   });
 });

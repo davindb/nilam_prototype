@@ -59,6 +59,19 @@ describe("buildPipeline", () => {
       const firstPasanganIdx = nodes.findIndex((n) => n.leg === "pasangan");
       expect(firstPasanganIdx).toBeGreaterThan(nasabahIncomeIdx);
     });
+
+    it("pasangan leg has exact node chain", () => {
+      const pasanganNodes = nodes.filter((n) => n.leg === "pasangan").map((n) => n.nodeId);
+      expect(pasanganNodes).toEqual([
+        "identity_ocr",
+        "liveness_selfie",
+        "ocr_slip",
+        "ocr_mutasi",
+        "fraud_screening",
+        "slik_retrieval",
+        "income_extraction",
+      ]);
+    });
   });
 
   describe("payroll-joint", () => {
@@ -97,6 +110,20 @@ describe("buildPipeline", () => {
 
     it("has no pasangan leg", () => {
       expect(nodes.some((n) => n.leg === "pasangan")).toBe(false);
+    });
+
+    it("nasabah leg has exact node chain", () => {
+      const nasabahNodes = nodes.filter((n) => n.leg === "nasabah").map((n) => n.nodeId);
+      expect(nasabahNodes).toEqual([
+        "ocr_slip",
+        "ocr_mutasi",
+        "doc_validation",
+        "fraud_screening",
+        "doc_classification",
+        "slik_retrieval",
+        "income_extraction",
+        "thp_computation",
+      ]);
     });
   });
 });
