@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { Cpu } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { LiveIndicator } from "@/components/common/LiveIndicator";
@@ -23,6 +24,12 @@ import type { CustomerIncome, ComponentKey, ComponentMode } from "@/types/income
 import type { OcrMutasiResult, FraudResult, SlikResult, IdentityResult } from "@/types/engines";
 import { CustomerCard } from "./CustomerCard";
 import { ThpEngineCard } from "./ThpEngineCard";
+
+// ---------------------------------------------------------------------------
+// Module-level constants (F2: hoisted from render)
+// ---------------------------------------------------------------------------
+
+const INPUT_STEPS: FlowStep[] = ["income_type", "payroll_confirm", "document_upload", "joint_documents"];
 
 // ---------------------------------------------------------------------------
 // Animation constants — mirror SOFIA's staggered section pattern
@@ -303,10 +310,20 @@ export function BehindTheScenePanel({
   setComponentMode,
   setComponentWeight,
 }: BehindTheScenePanelProps) {
-  const feed = useOrchestrationFeed(events);
   const animKey = `${currentStep}-${persona?.id ?? "none"}`;
 
-  const inputSteps: FlowStep[] = ["income_type", "payroll_confirm", "document_upload", "joint_documents"];
+  // F1: Compute submitted-state SLIK result via a single small useMemo over
+  // events — no redundant useOrchestrationFeed call in the outer component.
+  const submittedSlikResult = useMemo<SlikResult | undefined>(() => {
+    const target = nodeKey("nasabah", "slik_retrieval");
+    let found: SlikResult | undefined;
+    for (const e of events) {
+      if (nodeKey(e.leg, e.nodeId) === target && e.status === "success" && e.output) {
+        found = e.output as SlikResult;
+      }
+    }
+    return found;
+  }, [events]);
 
   return (
     <div className="flex h-[760px] w-full flex-col overflow-hidden rounded-card bg-white shadow-panel">
@@ -359,7 +376,7 @@ export function BehindTheScenePanel({
             {/* ============================================================ */}
             {/* INPUT STEPS — journey + switcher + idle pipeline preview       */}
             {/* ============================================================ */}
-            {inputSteps.includes(currentStep) && persona && (
+            {INPUT_STEPS.includes(currentStep) && persona && (
               <>
                 <motion.div variants={SECTION_VARIANTS} transition={SECTION_TRANSITION}>
                   <GlassCard className="px-4 py-4">
@@ -438,13 +455,7 @@ export function BehindTheScenePanel({
                 {/* SLIK detail stays visible to show Angsuran lineage */}
                 <motion.div variants={SECTION_VARIANTS} transition={SECTION_TRANSITION}>
                   <GlassCard className="px-4 py-4">
-                    <SlikDetail
-                      result={
-                        feed.latest.get(nodeKey("nasabah", "slik_retrieval"))?.output as
-                          | SlikResult
-                          | undefined
-                      }
-                    />
+                    <SlikDetail result={submittedSlikResult} />
                   </GlassCard>
                 </motion.div>
 
