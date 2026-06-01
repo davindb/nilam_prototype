@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 
 interface ConfidenceMeterProps {
   /** Raw confidence value in the 0..1 range. */
@@ -22,6 +22,7 @@ function deriveLevel(c: number): string {
  * Mirrors SOFIA's ConfidenceMeter.
  */
 export function ConfidenceMeter({ confidence, level }: ConfidenceMeterProps) {
+  const shouldReduceMotion = useReducedMotion();
   const clamped = Math.max(0, Math.min(1, confidence));
   const pct = (clamped * 100).toFixed(1);
   const displayLevel = level ?? deriveLevel(clamped);
@@ -33,7 +34,7 @@ export function ConfidenceMeter({ confidence, level }: ConfidenceMeterProps) {
           className="h-full rounded-pill bg-bri-navy"
           initial={{ width: 0 }}
           animate={{ width: `${clamped * 100}%` }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
+          transition={{ duration: shouldReduceMotion ? 0 : 0.6, ease: "easeOut" }}
         />
       </div>
       <span className="text-sm font-bold text-bri-navy tabular-nums">

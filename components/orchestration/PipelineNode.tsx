@@ -13,7 +13,7 @@ import {
   Loader2,
   type LucideIcon,
 } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/cn";
 import { ConfidenceMeter } from "./ConfidenceMeter";
 import type { NodeSpec, NodeStatus, OrchestrationEvent } from "@/types/orchestration";
@@ -43,6 +43,7 @@ interface PipelineNodeProps {
  * - failed:  red XCircle
  */
 export function PipelineNode({ spec, status, event }: PipelineNodeProps) {
+  const shouldReduceMotion = useReducedMotion();
   const Icon = GROUP_ICONS[spec.group];
 
   return (
@@ -117,7 +118,7 @@ export function PipelineNode({ spec, status, event }: PipelineNodeProps) {
               className="absolute left-0 top-0 h-full rounded-pill bg-nilam-run"
               initial={{ width: 0 }}
               animate={{ width: `${(event?.progress ?? 0) * 100}%` }}
-              transition={{ duration: 0.4, ease: "easeOut" }}
+              transition={{ duration: shouldReduceMotion ? 0 : 0.4, ease: "easeOut" }}
             />
             {/* scan-shimmer overlay */}
             <span className="absolute inset-0 overflow-hidden rounded-pill">
