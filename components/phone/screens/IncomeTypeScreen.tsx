@@ -1,6 +1,5 @@
 import { motion } from "framer-motion";
 import { TrendingUp } from "lucide-react";
-import { PhoneStatusBar } from "@/components/phone/PhoneStatusBar";
 import { DisabledOption } from "@/components/phone/ui/DisabledOption";
 
 interface IncomeTypeScreenProps {
@@ -14,8 +13,6 @@ interface IncomeTypeScreenProps {
 export function IncomeTypeScreen({ onPickFix }: IncomeTypeScreenProps) {
   return (
     <div className="flex flex-1 flex-col overflow-y-auto scroll-thin">
-      <PhoneStatusBar />
-
       <div className="flex flex-col gap-5 px-5 py-4">
         <motion.div
           initial={{ opacity: 0, y: 10 }}

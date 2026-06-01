@@ -1,5 +1,4 @@
 import { motion } from "framer-motion";
-import { PhoneStatusBar } from "@/components/phone/PhoneStatusBar";
 
 /**
  * Processing / pipeline-running screen.
@@ -19,7 +18,6 @@ import { PhoneStatusBar } from "@/components/phone/PhoneStatusBar";
 export function ProcessingScreen() {
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
-      <PhoneStatusBar />
 
       <div className="flex flex-1 flex-col items-center justify-center gap-8 px-5 py-8 text-center">
         {/* Animated ring + badge */}

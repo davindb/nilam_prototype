@@ -1,6 +1,5 @@
 import { motion } from "framer-motion";
 import { CheckCircle2 } from "lucide-react";
-import { PhoneStatusBar } from "@/components/phone/PhoneStatusBar";
 
 interface SubmittedScreenProps {
   onRestart: () => void;
@@ -15,7 +14,6 @@ interface SubmittedScreenProps {
 export function SubmittedScreen({ onRestart }: SubmittedScreenProps) {
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
-      <PhoneStatusBar />
 
       <div className="flex flex-1 flex-col items-center justify-center gap-8 px-5 py-8 text-center">
         {/* Animated check */}
