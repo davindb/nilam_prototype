@@ -103,52 +103,76 @@ export function ThpEngineCard({ nasabah, pasangan, isJoint }: ThpEngineCardProps
             </div>
           </div>
 
-          {/* THP boxes row */}
-          <div className="grid grid-cols-2 gap-1">
-            {/* THP Nasabah */}
-            <div className="rounded-lg border border-bri-navy/20 bg-bri-bg p-1.5">
-              <span className="block text-[7px] font-semibold uppercase text-bri-muted leading-none mb-0.5">
-                THP Nasabah
-              </span>
-              <AnimatedThp
-                value={nasabahThp}
-                className="block text-[12px] font-bold text-bri-navy leading-tight"
-              />
-            </div>
-
-            {/* THP Pasangan */}
-            <div
-              className={cn(
-                "rounded-lg border p-1.5",
-                isJoint && pThp
-                  ? "border-bri-navy/20 bg-bri-bg"
-                  : "border-dashed border-bri-line bg-bri-bg/40 opacity-50",
-              )}
-            >
-              <span className="block text-[7px] font-semibold uppercase text-bri-muted leading-none mb-0.5">
-                THP Pasangan
-              </span>
-              {isJoint && pThp ? (
+          {/* THP boxes — joint: [Nasabah|Pasangan] then THP Total below
+                          non-joint: [Nasabah | Total] side by side, both prominent */}
+          {isJoint ? (
+            /* Joint — keep 3-section vertical layout: RUMUS · [N|P] · Total */
+            <div className="grid grid-cols-2 gap-1">
+              {/* THP Nasabah */}
+              <div className="rounded-lg border border-bri-navy/20 bg-bri-bg p-1.5">
+                <span className="block text-[7px] font-semibold uppercase text-bri-muted leading-none mb-0.5">
+                  THP Nasabah
+                </span>
                 <AnimatedThp
-                  value={pasanganThp}
+                  value={nasabahThp}
                   className="block text-[12px] font-bold text-bri-navy leading-tight"
                 />
-              ) : (
-                <span className="block text-[12px] font-bold text-bri-muted leading-tight">—</span>
-              )}
-            </div>
-          </div>
+              </div>
 
-          {/* THP Total — headline, pinned at bottom */}
-          <div className="rounded-lg border border-bri-navy/25 bg-gradient-to-br from-bri-bg to-bri-bg/60 p-1.5">
-            <span className="block text-[7px] font-semibold uppercase text-bri-muted leading-none mb-0.5">
-              {isJoint ? "THP Total (Joint Income)" : "THP Total"}
-            </span>
-            <AnimatedThp
-              value={totalThp}
-              className="block text-[16px] font-extrabold text-bri-navy leading-tight"
-            />
-          </div>
+              {/* THP Pasangan — joint mode */}
+              <div className="rounded-lg border border-bri-navy/20 bg-bri-bg p-1.5">
+                <span className="block text-[7px] font-semibold uppercase text-bri-muted leading-none mb-0.5">
+                  THP Pasangan
+                </span>
+                {pThp ? (
+                  <AnimatedThp
+                    value={pasanganThp}
+                    className="block text-[12px] font-bold text-bri-navy leading-tight"
+                  />
+                ) : (
+                  <span className="block text-[12px] font-bold text-bri-muted leading-tight">—</span>
+                )}
+              </div>
+            </div>
+          ) : (
+            /* Non-joint: Nasabah + Total side by side, both prominent, no Pasangan box */
+            <div className="grid grid-cols-2 gap-2">
+              {/* THP Nasabah — wider box */}
+              <div className="rounded-lg border border-bri-navy/20 bg-bri-bg p-2">
+                <span className="block text-[7px] font-semibold uppercase text-bri-muted leading-none mb-1">
+                  THP Nasabah
+                </span>
+                <AnimatedThp
+                  value={nasabahThp}
+                  className="block text-[14px] font-bold text-bri-navy leading-tight"
+                />
+              </div>
+
+              {/* THP Total — highlighted, same row */}
+              <div className="rounded-lg border border-bri-navy/25 bg-gradient-to-br from-bri-bg to-bri-bg/60 p-2">
+                <span className="block text-[7px] font-semibold uppercase text-bri-muted leading-none mb-1">
+                  THP Total
+                </span>
+                <AnimatedThp
+                  value={totalThp}
+                  className="block text-[14px] font-extrabold text-bri-navy leading-tight"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* THP Total — full-width headline pinned at bottom (joint only) */}
+          {isJoint && (
+            <div className="rounded-lg border border-bri-navy/25 bg-gradient-to-br from-bri-bg to-bri-bg/60 p-1.5">
+              <span className="block text-[7px] font-semibold uppercase text-bri-muted leading-none mb-0.5">
+                THP Total (Joint Income)
+              </span>
+              <AnimatedThp
+                value={totalThp}
+                className="block text-[16px] font-extrabold text-bri-navy leading-tight"
+              />
+            </div>
+          )}
         </div>
       )}
     </div>

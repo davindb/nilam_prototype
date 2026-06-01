@@ -89,38 +89,58 @@ export function BehindTheScene({
         </div>
       </div>
 
-      {/* ── ROW B — flex-[3]: Fraud · Identity · SLIK ───────────────── */}
-      <div className="grid min-h-0 flex-[3] grid-cols-3 gap-3 overflow-hidden">
+      {/* ── ROW B — flex-[3]: Fraud · [Identity Pasangan?] · SLIK ─────
+           joint  → grid-cols-3: Fraud | Identity (Pasangan) | SLIK
+           single → grid-cols-2: Fraud | SLIK (spouse card not rendered)
+      ────────────────────────────────────────────────────────────── */}
+      <div
+        className={`grid min-h-0 flex-[3] gap-3 overflow-hidden ${
+          isJoint ? "grid-cols-3" : "grid-cols-2"
+        }`}
+      >
         <FraudDetectionCard
           status={statusOf("fraud")}
           result={latest.get("fraud")?.output as FraudResult | undefined}
+          isWide={!isJoint}
         />
-        <IdentityCheckCard
-          status={statusOf("identity")}
-          identity={latest.get("identity")?.output as IdentityResult | null | undefined}
-          isJoint={isJoint}
-        />
+        {isJoint && (
+          <IdentityCheckCard
+            status={statusOf("identity")}
+            identity={latest.get("identity")?.output as IdentityResult | null | undefined}
+            isJoint={isJoint}
+          />
+        )}
         <SlikRetrievalCard
           status={statusOf("slik")}
           slik={latest.get("slik")?.output as { nasabah: SlikResult; pasangan?: SlikResult } | undefined}
+          isWide={!isJoint}
         />
       </div>
 
-      {/* ── ROW C — flex-[3]: Income Nasabah · Income Pasangan · THP ── */}
-      <div className="grid min-h-0 flex-[3] grid-cols-3 gap-3 overflow-hidden">
+      {/* ── ROW C — flex-[3]: Income Nasabah · [Income Pasangan?] · THP
+           joint  → grid-cols-3: Income Nasabah | Income Pasangan | THP
+           single → grid-cols-2: Income Nasabah | THP (spouse card not rendered)
+      ────────────────────────────────────────────────────────────── */}
+      <div
+        className={`grid min-h-0 flex-[3] gap-3 overflow-hidden ${
+          isJoint ? "grid-cols-3" : "grid-cols-2"
+        }`}
+      >
         <IncomeComponentsCard
           title="INCOME COMPONENTS - NASABAH"
           income={nasabah}
           onMode={(k, m) => setComponentMode("nasabah", k, m)}
           onWeight={(k, w) => setComponentWeight("nasabah", k, w)}
         />
-        <IncomeComponentsCard
-          title="INCOME COMPONENTS - PASANGAN"
-          income={pasangan}
-          stripped={!isJoint}
-          onMode={(k, m) => setComponentMode("pasangan", k, m)}
-          onWeight={(k, w) => setComponentWeight("pasangan", k, w)}
-        />
+        {isJoint && (
+          <IncomeComponentsCard
+            title="INCOME COMPONENTS - PASANGAN"
+            income={pasangan}
+            stripped={!isJoint}
+            onMode={(k, m) => setComponentMode("pasangan", k, m)}
+            onWeight={(k, w) => setComponentWeight("pasangan", k, w)}
+          />
+        )}
         <ThpEngineCard
           nasabah={nasabah}
           pasangan={pasangan}

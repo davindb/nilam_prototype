@@ -7,6 +7,8 @@ import type { SlikResult } from "@/types/engines";
 interface SlikRetrievalCardProps {
   status: NodeStatus;
   slik: { nasabah: SlikResult; pasangan?: SlikResult } | undefined;
+  /** True when card is in a 2-col row (wider); lays out fields in 2-col grid */
+  isWide?: boolean;
 }
 
 /** Format a number as Indonesian Rupiah: Rp150.000.000 */
@@ -41,29 +43,42 @@ function SlikRow({
 /**
  * Single SLIK data section (Nasabah or Pasangan).
  * Shows icon tile + rows: Outstanding, Angsuran, Tunggakan, Status, Score.
+ * When `wide` is true, lays out the four data rows in a 2-column grid to fill the width.
  */
 function SlikSection({
   title,
   data,
+  wide = false,
 }: {
   title: string;
   data: SlikResult;
+  wide?: boolean;
 }) {
   return (
-    <div>
+    <div className="flex flex-1 flex-col min-h-0">
       {/* Sub-section label */}
       <span className="mb-1 block text-[7.5px] font-semibold uppercase tracking-[0.1em] text-bri-navy/70">
         {title}
       </span>
 
-      <div className="flex items-start gap-2">
-        {/* SLIK icon tile */}
-        <div className="flex h-9 w-9 shrink-0 flex-col items-center justify-center gap-0.5 rounded-lg border border-bri-navy/20 bg-bri-bg">
-          <Landmark size={13} className="text-bri-navy" strokeWidth={1.5} />
+      <div className="flex items-start gap-3 flex-1">
+        {/* SLIK icon tile — slightly larger when wide */}
+        <div
+          className={`flex shrink-0 flex-col items-center justify-center gap-0.5 rounded-lg border border-bri-navy/20 bg-bri-bg ${
+            wide ? "h-12 w-12" : "h-9 w-9"
+          }`}
+        >
+          <Landmark size={wide ? 18 : 13} className="text-bri-navy" strokeWidth={1.5} />
         </div>
 
-        {/* Data rows */}
-        <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+        {/* Data rows — 2-col grid when wide, single col when compact */}
+        <div
+          className={`min-w-0 flex-1 ${
+            wide
+              ? "grid grid-cols-2 gap-x-4 gap-y-0.5 content-start"
+              : "flex flex-col gap-0.5"
+          }`}
+        >
           <SlikRow
             label="Outstanding Kredit"
             value={fmtRp(data.outstanding)}
@@ -85,9 +100,9 @@ function SlikSection({
       </div>
 
       {/* Score */}
-      <div className="mt-1 flex items-baseline gap-1 border-t border-bri-line/60 pt-1">
+      <div className="mt-1.5 flex items-baseline gap-1.5 border-t border-bri-line/60 pt-1.5">
         <span className="text-[8px] text-bri-muted">Score</span>
-        <span className="text-[16px] font-bold leading-none text-bri-navy">
+        <span className={`font-bold leading-none text-bri-navy ${wide ? "text-[20px]" : "text-[16px]"}`}>
           {data.score}
         </span>
       </div>
@@ -103,7 +118,7 @@ function SlikSection({
  * separated by a thin divider.
  * Idle/running shows a faint placeholder.
  */
-export function SlikRetrievalCard({ status, slik }: SlikRetrievalCardProps) {
+export function SlikRetrievalCard({ status, slik, isWide = false }: SlikRetrievalCardProps) {
   const isSuccess = status === "success" && !!slik;
 
   return (
@@ -130,17 +145,20 @@ export function SlikRetrievalCard({ status, slik }: SlikRetrievalCardProps) {
           <p className="text-[9px] italic text-bri-muted/40">Menunggu SLIK…</p>
         </div>
       ) : (
-        /* ── Success — Nasabah section + optional Pasangan section ── */
+        /* ── Success — Nasabah section + optional Pasangan section ──
+             isWide (non-joint, single section): SlikSection expands to fill
+             narrow (joint, two sections): stacked Nasabah + Pasangan
+        ── */
         <div className="flex flex-1 flex-col justify-between gap-1.5 min-h-0">
-          {/* SLIK Nasabah */}
-          <SlikSection title="SLIK Nasabah" data={slik.nasabah} />
+          {/* SLIK Nasabah — wide=true when isWide so internals use 2-col layout */}
+          <SlikSection title="SLIK Nasabah" data={slik.nasabah} wide={isWide} />
 
-          {/* SLIK Pasangan — rendered only when joint */}
+          {/* SLIK Pasangan — rendered only when joint (pasangan present) */}
           {slik.pasangan && (
             <>
               {/* Thin divider between sections */}
               <div className="shrink-0 border-t border-bri-line" />
-              <SlikSection title="SLIK Pasangan" data={slik.pasangan} />
+              <SlikSection title="SLIK Pasangan" data={slik.pasangan} wide={false} />
             </>
           )}
         </div>

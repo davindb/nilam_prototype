@@ -9,6 +9,8 @@ import { SpiderChart } from "./SpiderChart";
 interface FraudDetectionCardProps {
   status: NodeStatus;
   result: FraudResult | undefined;
+  /** True when card is in a 2-col row (wider); adjusts interior proportions */
+  isWide?: boolean;
 }
 
 /**
@@ -19,13 +21,17 @@ interface FraudDetectionCardProps {
  * Success state: spider chart left / checks right, confidence pinned at bottom.
  * Idle state: faint spider + "Menunggu…" centered.
  */
-export function FraudDetectionCard({ status, result }: FraudDetectionCardProps) {
+export function FraudDetectionCard({ status, result, isWide = false }: FraudDetectionCardProps) {
   const isSuccess = status === "success" && !!result;
 
   const idleScores = [0.15, 0.15, 0.15, 0.15];
   const chartScores = isSuccess
     ? result.checks.map((c) => c.score)
     : idleScores;
+
+  // In wider (2-col) layout: bigger spider + more spacious checks list
+  const chartSize = isWide ? 110 : 92;
+  const idleChartSize = isWide ? 100 : 88;
 
   return (
     <div className="flex h-full flex-col rounded-xl border border-bri-line bg-white px-2.5 py-2 shadow-soft">
@@ -37,9 +43,9 @@ export function FraudDetectionCard({ status, result }: FraudDetectionCardProps) 
       {/* Body — flex-1, fills remaining height */}
       {!isSuccess ? (
         /* ── Idle / running state ─────────────────────────────── */
-        <div className="flex flex-1 items-center gap-2">
+        <div className="flex flex-1 items-center gap-3">
           <div className="opacity-30">
-            <SpiderChart scores={idleScores} size={88} />
+            <SpiderChart scores={idleScores} size={idleChartSize} />
           </div>
           <div className="flex flex-col gap-1">
             {["Slip Gaji", "Mutasi", "Konsistensi", "Pattern"].map((lbl) => (
@@ -55,27 +61,27 @@ export function FraudDetectionCard({ status, result }: FraudDetectionCardProps) 
         /* ── Success state — spider left / checks right, confidence pinned bottom ── */
         <div className="flex flex-1 flex-col min-h-0">
           {/* Main row: spider + check list */}
-          <div className="flex flex-1 items-center gap-2 min-h-0">
-            {/* Spider chart — vertically centered */}
+          <div className="flex flex-1 items-center gap-3 min-h-0">
+            {/* Spider chart — vertically centered, larger when wide */}
             <div className="flex shrink-0 items-center">
-              <SpiderChart scores={chartScores} size={92} />
+              <SpiderChart scores={chartScores} size={chartSize} />
             </div>
 
             {/* Check list — fills remaining width, distributes rows evenly */}
-            <div className="flex min-w-0 flex-1 flex-col justify-between gap-0.5">
+            <div className="flex min-w-0 flex-1 flex-col justify-between gap-1">
               {result.checks.map((check) => (
-                <div key={check.name} className="flex items-center justify-between gap-1">
-                  <div className="flex items-center gap-1 min-w-0">
+                <div key={check.name} className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-1.5 min-w-0">
                     <CheckCircle2
-                      size={9}
+                      size={10}
                       className="shrink-0 text-emerald-500"
                       strokeWidth={2.5}
                     />
-                    <span className="truncate text-[9px] font-medium text-bri-ink">
+                    <span className="truncate text-[9.5px] font-medium text-bri-ink">
                       {check.name}
                     </span>
                   </div>
-                  <span className="shrink-0 text-[9px] font-semibold text-emerald-600">
+                  <span className="shrink-0 text-[10px] font-semibold text-emerald-600">
                     {Math.round(check.score * 100)}%
                   </span>
                 </div>
@@ -84,9 +90,9 @@ export function FraudDetectionCard({ status, result }: FraudDetectionCardProps) 
           </div>
 
           {/* Overall confidence — pinned at bottom */}
-          <div className="mt-1.5 flex shrink-0 items-baseline gap-1 border-t border-bri-line pt-1.5">
+          <div className="mt-1.5 flex shrink-0 items-baseline gap-1.5 border-t border-bri-line pt-1.5">
             <span className="text-[9px] text-bri-muted">Overall Confidence</span>
-            <span className="text-[18px] font-bold leading-none text-emerald-500">
+            <span className={cn("font-bold leading-none text-emerald-500", isWide ? "text-[22px]" : "text-[18px]")}>
               {Math.round(result.overall * 100)}%
             </span>
           </div>
