@@ -41,6 +41,8 @@ export default function Page() {
     setUpload,
     submit,
     reset,
+    setComponentMode,
+    setComponentWeight,
   } = useNilamFlow();
 
   // -------------------------------------------------------------------------
@@ -203,6 +205,8 @@ export default function Page() {
       nasabah={nasabah}
       pasangan={pasangan}
       onSelectPersona={selectPersona}
+      setComponentMode={setComponentMode}
+      setComponentWeight={setComponentWeight}
     />
   );
 

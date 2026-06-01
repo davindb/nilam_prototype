@@ -19,8 +19,10 @@ import { useOrchestrationFeed } from "@/hooks/useOrchestrationFeed";
 import { nodeKey } from "@/types/orchestration";
 import type { FlowStep, PersonaConfig } from "@/types/flow";
 import type { OrchestrationEvent, NodeLeg } from "@/types/orchestration";
-import type { CustomerIncome } from "@/types/income";
+import type { CustomerIncome, ComponentKey, ComponentMode } from "@/types/income";
 import type { OcrMutasiResult, FraudResult, SlikResult, IdentityResult } from "@/types/engines";
+import { CustomerCard } from "./CustomerCard";
+import { ThpEngineCard } from "./ThpEngineCard";
 
 // ---------------------------------------------------------------------------
 // Animation constants — mirror SOFIA's staggered section pattern
@@ -47,6 +49,10 @@ interface BehindTheScenePanelProps {
   /** Structured income result for pasangan — produced after income_extraction succeeds (joint only). */
   pasangan?: CustomerIncome;
   onSelectPersona: (id: string) => void;
+  /** Mutate mode (avg|min) for a given role+component; wired from useNilamFlow. */
+  setComponentMode: (role: NodeLeg, key: ComponentKey, mode: ComponentMode) => void;
+  /** Mutate weight [0–1] for a given role+component; wired from useNilamFlow. */
+  setComponentWeight: (role: NodeLeg, key: ComponentKey, weight: number) => void;
 }
 
 // ---------------------------------------------------------------------------
@@ -291,12 +297,11 @@ export function BehindTheScenePanel({
   currentStep,
   steps,
   events,
-  // nasabah and pasangan are accepted for Phase 5 CustomerCard / ThpEngineCard usage
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  nasabah: _nasabah,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  pasangan: _pasangan,
+  nasabah,
+  pasangan,
   onSelectPersona,
+  setComponentMode,
+  setComponentWeight,
 }: BehindTheScenePanelProps) {
   const feed = useOrchestrationFeed(events);
   const animKey = `${currentStep}-${persona?.id ?? "none"}`;
@@ -444,19 +449,37 @@ export function BehindTheScenePanel({
                 </motion.div>
 
                 {/* -------------------------------------------------------- */}
-                {/* PHASE 5 placeholder: CustomerCard + ThpEngineCard          */}
+                {/* PHASE 5: CustomerCard(s) + ThpEngineCard                   */}
                 {/* -------------------------------------------------------- */}
-                <motion.div variants={SECTION_VARIANTS} transition={SECTION_TRANSITION}>
-                  <GlassCard className="px-4 py-4">
-                    {/* PHASE 5: <CustomerCard/> + <ThpEngineCard/> mount here */}
-                    <SectionHeading className="mb-3">
-                      Hasil Asesmen Penghasilan
-                    </SectionHeading>
-                    <p className="text-xs text-bri-muted">
-                      Hasil asesmen penghasilan (kartu interaktif menyusul pada Phase 5).
-                    </p>
-                  </GlassCard>
-                </motion.div>
+                {nasabah && (
+                  <>
+                    <motion.div variants={SECTION_VARIANTS} transition={SECTION_TRANSITION}>
+                      <SectionHeading className="mb-2">Asesmen Penghasilan</SectionHeading>
+                    </motion.div>
+
+                    <motion.div variants={SECTION_VARIANTS} transition={SECTION_TRANSITION}>
+                      <CustomerCard
+                        income={nasabah}
+                        onMode={(key, mode) => setComponentMode("nasabah", key, mode)}
+                        onWeight={(key, weight) => setComponentWeight("nasabah", key, weight)}
+                      />
+                    </motion.div>
+
+                    {pasangan && (
+                      <motion.div variants={SECTION_VARIANTS} transition={SECTION_TRANSITION}>
+                        <CustomerCard
+                          income={pasangan}
+                          onMode={(key, mode) => setComponentMode("pasangan", key, mode)}
+                          onWeight={(key, weight) => setComponentWeight("pasangan", key, weight)}
+                        />
+                      </motion.div>
+                    )}
+
+                    <motion.div variants={SECTION_VARIANTS} transition={SECTION_TRANSITION}>
+                      <ThpEngineCard nasabah={nasabah} pasangan={pasangan} />
+                    </motion.div>
+                  </>
+                )}
               </>
             )}
 
