@@ -29,7 +29,15 @@ import { ThpEngineCard } from "./ThpEngineCard";
 // Module-level constants (F2: hoisted from render)
 // ---------------------------------------------------------------------------
 
-const INPUT_STEPS: FlowStep[] = ["income_type", "payroll_confirm", "document_upload", "joint_documents"];
+/** All steps that are "input" steps (not opening/processing/submitted). */
+const INPUT_STEPS: FlowStep[] = [
+  "income_type",
+  "joint_income",
+  "requirement_nasabah",
+  "spouse_identity",
+  "spouse_confirm",
+  "spouse_income",
+];
 
 // ---------------------------------------------------------------------------
 // Animation constants — mirror SOFIA's staggered section pattern
@@ -72,48 +80,6 @@ function getOutput<T>(
   nodeId: string
 ): T | undefined {
   return latest.get(nodeKey(leg, nodeId as Parameters<typeof nodeKey>[1]))?.output as T | undefined;
-}
-
-// ---------------------------------------------------------------------------
-// Sub-section: idle pipeline preview (all nodes idle, no events)
-// ---------------------------------------------------------------------------
-
-function IdlePipelinePreview({ persona }: { persona: PersonaConfig }) {
-  const specs = buildPipeline(persona);
-
-  // Group specs by leg
-  const nasabahSpecs = specs.filter((s) => s.leg === "nasabah");
-  const pasanjanSpecs = specs.filter((s) => s.leg === "pasangan");
-  const isJoint = pasanjanSpecs.length > 0;
-
-  return (
-    <div className="flex flex-col gap-2">
-      <SectionHeading>Pipeline Mesin AI (Preview)</SectionHeading>
-      <GlassCard className="px-4 py-3">
-        <div className="flex flex-col gap-2">
-          {isJoint && (
-            <span className="text-[10px] font-semibold uppercase tracking-wide text-bri-blue">
-              Nasabah
-            </span>
-          )}
-          {nasabahSpecs.map((spec) => (
-            <PipelineNode key={nodeKey(spec.leg, spec.nodeId)} spec={spec} status="idle" />
-          ))}
-          {isJoint && (
-            <>
-              <div className="my-1 border-t border-bri-line" />
-              <span className="text-[10px] font-semibold uppercase tracking-wide text-bri-sky">
-                Pasangan
-              </span>
-              {pasanjanSpecs.map((spec) => (
-                <PipelineNode key={nodeKey(spec.leg, spec.nodeId)} spec={spec} status="idle" />
-              ))}
-            </>
-          )}
-        </div>
-      </GlassCard>
-    </div>
-  );
 }
 
 // ---------------------------------------------------------------------------
@@ -294,9 +260,9 @@ function CompletedPipeline({ persona }: { persona: PersonaConfig }) {
  * currentStep + (persona?.id). Content adapts per step:
  *
  *  opening       → PersonaSelector only
- *  input steps   → JourneyFlowTracker + PersonaSwitcher + IdlePipelinePreview + idle ReasoningLog
- *  processing    → JourneyFlowTracker + PersonaSwitcher + LivePipeline (live nodes + group details) + ReasoningLog
- *  submitted     → JourneyFlowTracker (done) + CompletedPipeline + SlikDetail (Angsuran lineage) + Phase 5 placeholder
+ *  input steps   → JourneyFlowTracker + PersonaSwitcher + idle placeholder (NO pipeline preview)
+ *  processing    → JourneyFlowTracker + PersonaSwitcher + LivePipeline + ReasoningLog
+ *  submitted     → JourneyFlowTracker (done) + CompletedPipeline + SlikDetail(s) + Phase 5 cards
  */
 export function BehindTheScenePanel({
   persona,
@@ -312,18 +278,27 @@ export function BehindTheScenePanel({
 }: BehindTheScenePanelProps) {
   const animKey = `${currentStep}-${persona?.id ?? "none"}`;
 
-  // F1: Compute submitted-state SLIK result via a single small useMemo over
-  // events — no redundant useOrchestrationFeed call in the outer component.
-  const submittedSlikResult = useMemo<SlikResult | undefined>(() => {
-    const target = nodeKey("nasabah", "slik_retrieval");
-    let found: SlikResult | undefined;
+  // F1: Compute submitted-state SLIK results for both legs via a single useMemo.
+  const { submittedSlikNasabah, submittedSlikPasangan } = useMemo<{
+    submittedSlikNasabah: SlikResult | undefined;
+    submittedSlikPasangan: SlikResult | undefined;
+  }>(() => {
+    const targetN = nodeKey("nasabah", "slik_retrieval");
+    const targetP = nodeKey("pasangan", "slik_retrieval");
+    let foundN: SlikResult | undefined;
+    let foundP: SlikResult | undefined;
     for (const e of events) {
-      if (nodeKey(e.leg, e.nodeId) === target && e.status === "success" && e.output) {
-        found = e.output as SlikResult;
+      if (nodeKey(e.leg, e.nodeId) === targetN && e.status === "success" && e.output) {
+        foundN = e.output as SlikResult;
+      }
+      if (nodeKey(e.leg, e.nodeId) === targetP && e.status === "success" && e.output) {
+        foundP = e.output as SlikResult;
       }
     }
-    return found;
+    return { submittedSlikNasabah: foundN, submittedSlikPasangan: foundP };
   }, [events]);
+
+  const isJointPersona = !!persona?.isJointIncome;
 
   return (
     <div className="flex h-[760px] w-full flex-col overflow-hidden rounded-card bg-white shadow-panel">
@@ -374,13 +349,14 @@ export function BehindTheScenePanel({
             )}
 
             {/* ============================================================ */}
-            {/* INPUT STEPS — journey + switcher + idle pipeline preview       */}
+            {/* INPUT STEPS — journey + switcher + idle placeholder ONLY      */}
+            {/* Pipeline preview REMOVED (revision #8)                        */}
             {/* ============================================================ */}
             {INPUT_STEPS.includes(currentStep) && persona && (
               <>
                 <motion.div variants={SECTION_VARIANTS} transition={SECTION_TRANSITION}>
                   <GlassCard className="px-4 py-4">
-                    <JourneyFlowTracker steps={steps} currentStep={currentStep} />
+                    <JourneyFlowTracker currentStep={currentStep} />
                   </GlassCard>
                 </motion.div>
 
@@ -395,12 +371,14 @@ export function BehindTheScenePanel({
                   </div>
                 </motion.div>
 
+                {/* Idle placeholder — no pipeline nodes revealed */}
                 <motion.div variants={SECTION_VARIANTS} transition={SECTION_TRANSITION}>
-                  <IdlePipelinePreview persona={persona} />
-                </motion.div>
-
-                <motion.div variants={SECTION_VARIANTS} transition={SECTION_TRANSITION}>
-                  <ReasoningLog events={[]} />
+                  <div className="flex flex-col items-center gap-3 rounded-card bg-bri-bg px-5 py-6 ring-1 ring-bri-line">
+                    <LiveIndicator label="Menunggu pengajuan nasabah…" />
+                    <p className="text-center text-xs text-bri-muted">
+                      Pipeline AI akan aktif setelah nasabah mengajukan aplikasi.
+                    </p>
+                  </div>
                 </motion.div>
               </>
             )}
@@ -412,7 +390,7 @@ export function BehindTheScenePanel({
               <>
                 <motion.div variants={SECTION_VARIANTS} transition={SECTION_TRANSITION}>
                   <GlassCard className="px-4 py-4">
-                    <JourneyFlowTracker steps={steps} currentStep={currentStep} />
+                    <JourneyFlowTracker currentStep={currentStep} />
                   </GlassCard>
                 </motion.div>
 
@@ -444,7 +422,7 @@ export function BehindTheScenePanel({
               <>
                 <motion.div variants={SECTION_VARIANTS} transition={SECTION_TRANSITION}>
                   <GlassCard className="px-4 py-4">
-                    <JourneyFlowTracker steps={steps} currentStep={currentStep} />
+                    <JourneyFlowTracker currentStep={currentStep} />
                   </GlassCard>
                 </motion.div>
 
@@ -452,12 +430,28 @@ export function BehindTheScenePanel({
                   <CompletedPipeline persona={persona} />
                 </motion.div>
 
-                {/* SLIK detail stays visible to show Angsuran lineage */}
+                {/* SLIK detail(s) — one for nasabah always, one for pasangan if joint */}
                 <motion.div variants={SECTION_VARIANTS} transition={SECTION_TRANSITION}>
                   <GlassCard className="px-4 py-4">
-                    <SlikDetail result={submittedSlikResult} />
+                    {isJointPersona && (
+                      <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-bri-blue">
+                        SLIK — Nasabah
+                      </p>
+                    )}
+                    <SlikDetail result={submittedSlikNasabah} />
                   </GlassCard>
                 </motion.div>
+
+                {isJointPersona && (
+                  <motion.div variants={SECTION_VARIANTS} transition={SECTION_TRANSITION}>
+                    <GlassCard className="px-4 py-4">
+                      <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-bri-sky">
+                        SLIK — Pasangan
+                      </p>
+                      <SlikDetail result={submittedSlikPasangan} />
+                    </GlassCard>
+                  </motion.div>
+                )}
 
                 {/* -------------------------------------------------------- */}
                 {/* PHASE 5: CustomerCard(s) + ThpEngineCard                   */}
