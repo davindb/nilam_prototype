@@ -15,6 +15,13 @@ import { MUTASI, SLIP_GAJI, SPOUSE_MUTASI, SPOUSE_SLIP_GAJI, KTP_PASANGAN } from
 import { SLIK_NASABAH, SLIK_PASANGAN } from "@/data/slikFixtures";
 
 // ---------------------------------------------------------------------------
+// Fixture constants
+// ---------------------------------------------------------------------------
+
+/** F6: Realistic Indonesian display name for the nasabah fixture. */
+const NASABAH_NAMA = "Rangga Saputra";
+
+// ---------------------------------------------------------------------------
 // State shape
 // ---------------------------------------------------------------------------
 
@@ -233,7 +240,7 @@ export function useNilamFlow() {
     // All other inputs (MUTASI, SLIK_*, KTP_PASANGAN, ...) are module-level constants.
 
     // Build income values using SLIK totals for angsuran.
-    const incomeN = extractIncome("nasabah", "Nasabah", MUTASI, SLIK_NASABAH.totalAngsuran);
+    const incomeN = extractIncome("nasabah", NASABAH_NAMA, MUTASI, SLIK_NASABAH.totalAngsuran);
     const incomeP = persona.isJointIncome
       ? extractIncome("pasangan", KTP_PASANGAN.Nama, SPOUSE_MUTASI, SLIK_PASANGAN.totalAngsuran)
       : undefined;
