@@ -2,24 +2,16 @@
 
 import { useCallback, useEffect, useReducer, useRef } from "react";
 import type { FlowStep, PersonaConfig } from "@/types/flow";
-import type { OrchestrationEvent, NodeLeg } from "@/types/orchestration";
-import { nodeKey } from "@/types/orchestration";
+import type { OrchestrationEvent, NodeId } from "@/types/orchestration";
 import type { CustomerIncome, ComponentKey, ComponentMode } from "@/types/income";
 import type { EventListener } from "@/engines/orchestrator/events";
 import { planFlow } from "@/engines/persona/personaEngine";
-import { extractIncome } from "@/engines/income/incomeExtractionEngine";
 import { WorkflowOrchestrator } from "@/engines/orchestrator/workflowOrchestrator";
-import { screen, livenessMatch } from "@/engines/fraud/fraudEngine";
 import { personaById } from "@/data/personas";
-import { MUTASI, SLIP_GAJI, SPOUSE_MUTASI, SPOUSE_SLIP_GAJI, KTP_PASANGAN } from "@/data/ocrFixtures";
+import { SLIP_GAJI, MUTASI, IDENTITY_PASANGAN } from "@/data/ocrFixtures";
 import { SLIK_NASABAH, SLIK_PASANGAN } from "@/data/slikFixtures";
-
-// ---------------------------------------------------------------------------
-// Fixture constants
-// ---------------------------------------------------------------------------
-
-/** F6: Realistic Indonesian display name for the nasabah fixture. */
-const NASABAH_NAMA = "Rangga Saputra";
+import { FRAUD_RESULT } from "@/data/fraudFixtures";
+import { NASABAH_INCOME, PASANGAN_INCOME } from "@/data/incomeFixtures";
 
 // ---------------------------------------------------------------------------
 // State shape
@@ -29,6 +21,7 @@ export interface NilamState {
   persona: PersonaConfig | null;
   steps: FlowStep[];
   stepIndex: number;
+  jointAnswer?: "ya" | "tidak";
   uploads: Record<string, boolean>;
   events: OrchestrationEvent[];
   nasabah?: CustomerIncome;
@@ -44,10 +37,11 @@ export type NilamAction =
   | { type: "next" }
   | { type: "goTo"; step: FlowStep }
   | { type: "goBack" }
+  | { type: "setJointAnswer"; answer: "ya" | "tidak" }
   | { type: "setUpload"; key: string }
   | { type: "appendEvent"; event: OrchestrationEvent }
-  | { type: "setIncome"; leg: NodeLeg; income: CustomerIncome }
-  | { type: "setComponent"; role: NodeLeg; key: ComponentKey; patch: { mode?: ComponentMode; weight?: number } }
+  | { type: "setIncome"; role: "nasabah" | "pasangan"; income: CustomerIncome }
+  | { type: "setComponent"; role: "nasabah" | "pasangan"; key: ComponentKey; patch: { mode?: ComponentMode; weight?: number } }
   | { type: "reset" };
 
 // ---------------------------------------------------------------------------
@@ -59,6 +53,7 @@ export function initialState(): NilamState {
     persona: null,
     steps: ["opening"],
     stepIndex: 0,
+    jointAnswer: undefined,
     uploads: {},
     events: [],
     nasabah: undefined,
@@ -95,16 +90,19 @@ export function nilamReducer(state: NilamState, action: NilamAction): NilamState
     case "goBack": {
       const leavingStep = state.steps[state.stepIndex];
       const nextIndex = Math.max(state.stepIndex - 1, 0);
-      const isRollingBack = leavingStep === "processing" || leavingStep === "submitted";
+      const isRollingBack = leavingStep === "processing" || leavingStep === "analyst_decision";
       return {
         ...state,
         stepIndex: nextIndex,
-        // Rollback pipeline state when leaving processing or submitted
+        // Rollback pipeline state when leaving processing or analyst_decision
         ...(isRollingBack
           ? { events: [], nasabah: undefined, pasangan: undefined }
           : {}),
       };
     }
+
+    case "setJointAnswer":
+      return { ...state, jointAnswer: action.answer };
 
     case "setUpload":
       return { ...state, uploads: { ...state.uploads, [action.key]: true } };
@@ -115,7 +113,7 @@ export function nilamReducer(state: NilamState, action: NilamAction): NilamState
     case "setIncome":
       return {
         ...state,
-        [action.leg === "nasabah" ? "nasabah" : "pasangan"]: action.income,
+        [action.role === "nasabah" ? "nasabah" : "pasangan"]: action.income,
       };
 
     case "setComponent": {
@@ -170,7 +168,7 @@ export function useNilamFlow() {
   const canGoBack =
     state.stepIndex > 0 &&
     currentStep !== "processing" &&
-    currentStep !== "submitted";
+    currentStep !== "analyst_decision";
 
   // -------------------------------------------------------------------------
   // Public actions
@@ -199,19 +197,23 @@ export function useNilamFlow() {
     dispatch({ type: "goBack" });
   }, [cancelOrchestrator]);
 
+  const setJointAnswer = useCallback((ans: "ya" | "tidak") => {
+    dispatch({ type: "setJointAnswer", answer: ans });
+  }, []);
+
   const setUpload = useCallback((key: string) => {
     dispatch({ type: "setUpload", key });
   }, []);
 
   const setComponentMode = useCallback(
-    (role: NodeLeg, key: ComponentKey, mode: ComponentMode) => {
+    (role: "nasabah" | "pasangan", key: ComponentKey, mode: ComponentMode) => {
       dispatch({ type: "setComponent", role, key, patch: { mode } });
     },
     []
   );
 
   const setComponentWeight = useCallback(
-    (role: NodeLeg, key: ComponentKey, weight: number) => {
+    (role: "nasabah" | "pasangan", key: ComponentKey, weight: number) => {
       dispatch({ type: "setComponent", role, key, patch: { weight } });
     },
     []
@@ -223,48 +225,29 @@ export function useNilamFlow() {
   }, [cancelOrchestrator]);
 
   // -------------------------------------------------------------------------
-  // submit() — orchestration kick
+  // submit() — orchestration kick (called from Requirement step)
   // -------------------------------------------------------------------------
 
   const submit = useCallback(() => {
     const persona = state.persona;
     if (!persona) return;
 
-    // Cancel any in-flight orchestrator before starting a new run, so a
-    // double-tap cannot leave a previous orchestrator emitting ghost
-    // `appendEvent`/`setIncome` dispatches into the new run's state.
+    // Cancel any in-flight orchestrator before starting a new run.
     cancelOrchestrator();
 
-    // `submit` is re-created whenever `persona` changes (see dep array below),
-    // so the `persona` captured here is always the latest selected persona.
-    // All other inputs (MUTASI, SLIK_*, KTP_PASANGAN, ...) are module-level constants.
-
-    // Build income values using SLIK totals for angsuran.
-    const incomeN = extractIncome("nasabah", NASABAH_NAMA, MUTASI, SLIK_NASABAH.totalAngsuran);
-    const incomeP = persona.isJointIncome
-      ? extractIncome("pasangan", KTP_PASANGAN.Nama, SPOUSE_MUTASI, SLIK_PASANGAN.totalAngsuran)
-      : undefined;
-
-    // `thp_computation` intentionally has no entry here — THP is computed live
-    // from the income components in the cards, not pre-computed at submit time.
-    // Build full outputs map — over-including is fine; orchestrator reads by key.
-    const outputs: Record<string, unknown> = {
-      [nodeKey("nasabah", "payroll_pull")]: { source: "BRI Payroll", mutasi: MUTASI },
-      [nodeKey("nasabah", "ocr_slip")]: SLIP_GAJI,
-      [nodeKey("nasabah", "ocr_mutasi")]: MUTASI,
-      [nodeKey("nasabah", "fraud_screening")]: screen("dokumen nasabah"),
-      [nodeKey("nasabah", "slik_retrieval")]: SLIK_NASABAH,
-      [nodeKey("nasabah", "income_extraction")]: incomeN,
-      [nodeKey("nasabah", "doc_validation")]: { monthsVerified: 12, complete: true },
-      [nodeKey("nasabah", "doc_classification")]: { documents: ["Slip Gaji", "Mutasi 12 Bulan"], quality: "baik" },
-      [nodeKey("pasangan", "identity_ocr")]: KTP_PASANGAN,
-      [nodeKey("pasangan", "liveness_selfie")]: livenessMatch(),
-      [nodeKey("pasangan", "payroll_pull")]: { source: "BRI Payroll (Pasangan)", mutasi: SPOUSE_MUTASI },
-      [nodeKey("pasangan", "ocr_slip")]: SPOUSE_SLIP_GAJI,
-      [nodeKey("pasangan", "ocr_mutasi")]: SPOUSE_MUTASI,
-      [nodeKey("pasangan", "fraud_screening")]: screen("dokumen pasangan"),
-      [nodeKey("pasangan", "slik_retrieval")]: SLIK_PASANGAN,
-      [nodeKey("pasangan", "income_extraction")]: incomeP,
+    // Build outputs keyed by NodeId
+    const outputs: Partial<Record<NodeId, unknown>> = {
+      upload:   { files: ["slip_gaji_nasabah.pdf", "mutasi_12_bulan.pdf"] },
+      ocr:      { slip: SLIP_GAJI, mutasi: MUTASI },
+      validasi: { monthsVerified: 12, complete: true },
+      fraud:    FRAUD_RESULT,
+      identity: persona.isJointIncome ? IDENTITY_PASANGAN : null,
+      slik:     SLIK_NASABAH,
+      income:   {
+        nasabah: NASABAH_INCOME,
+        pasangan: persona.isJointIncome ? PASANGAN_INCOME : undefined,
+      },
+      thp:      null,
     };
 
     // Navigate to the processing step.
@@ -276,28 +259,23 @@ export function useNilamFlow() {
 
     const emit: EventListener = (e) => {
       dispatch({ type: "appendEvent", event: e });
-      // When income_extraction succeeds, persist the structured income result.
-      if (e.status === "success" && e.nodeId === "income_extraction" && e.output) {
-        dispatch({
-          type: "setIncome",
-          leg: e.leg,
-          income: e.output as CustomerIncome,
-        });
+      // When income node succeeds, set nasabah/pasangan from its output.
+      if (e.status === "success" && e.nodeId === "income" && e.output) {
+        const out = e.output as { nasabah: CustomerIncome; pasangan?: CustomerIncome };
+        dispatch({ type: "setIncome", role: "nasabah", income: out.nasabah });
+        if (out.pasangan) {
+          dispatch({ type: "setIncome", role: "pasangan", income: out.pasangan });
+        }
       }
     };
 
-    // Run the pipeline. Only advance to `submitted` if this specific
-    // orchestrator instance is still the active one — a cancel() + reset/back
-    // sets orchestratorRef.current = null, so the guard below prevents a
-    // cancelled run from silently advancing the flow.
+    // Run the pipeline. Only advance to `analyst_decision` if this specific
+    // orchestrator instance is still the active one.
     orch.run(persona, outputs, emit).then(() => {
       if (orchestratorRef.current === orch) {
-        dispatch({ type: "goTo", step: "submitted" });
+        dispatch({ type: "goTo", step: "analyst_decision" });
       }
     });
-  // We intentionally include state.persona so submit() always uses the
-  // current persona. The callback is re-created when persona changes.
-  // cancelOrchestrator is a stable useCallback([]) — safe to include.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.persona, cancelOrchestrator]);
 
@@ -307,6 +285,7 @@ export function useNilamFlow() {
     currentStep,
     stepIndex: state.stepIndex,
     canGoBack,
+    jointAnswer: state.jointAnswer,
     uploads: state.uploads,
     events: state.events,
     nasabah: state.nasabah,
@@ -315,6 +294,7 @@ export function useNilamFlow() {
     start,
     next,
     goBack,
+    setJointAnswer,
     setUpload,
     submit,
     setComponentMode,

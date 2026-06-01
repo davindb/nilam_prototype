@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { adjusted, computeThp, computeJointThp } from "./thpEngine";
 import type { CustomerIncome, IncomeComponent } from "@/types/income";
+import { NASABAH_INCOME, PASANGAN_INCOME } from "@/data/incomeFixtures";
 
 const comp = (over: Partial<IncomeComponent>): IncomeComponent => ({
   key: "Gaji", avg: 10_000_000, min: 10_000_000, mode: "avg", weight: 1, ...over,
@@ -51,5 +52,27 @@ describe("computeJointThp", () => {
   it("total = nasabah.thp when no pasangan", () => {
     const r = computeJointThp(nasabah());
     expect(r.total).toBe(58_500_000);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Reference-fixture sanity: NASABAH_INCOME, PASANGAN_INCOME from incomeFixtures
+// ---------------------------------------------------------------------------
+
+describe("computeThp — reference fixture sanity", () => {
+  it("NASABAH_INCOME THP = 21_000_000", () => {
+    // Gaji: 10M*0.5=5M, THR: 20M*0.5=10M, Bonus: 30M*0.3=9M, Insentif: 1M*0.5=0.5M
+    // gross = 24.5M, angsuran = 3.5M, THP = 21M
+    expect(computeThp(NASABAH_INCOME).thp).toBe(21_000_000);
+  });
+
+  it("PASANGAN_INCOME THP = 17_500_000", () => {
+    // Gaji: 8M*0.5=4M, THR: 16M*0.5=8M, Bonus: 20M*0.5=10M, Insentif: 0.8M*0.5=0.4M
+    // gross = 22.4M, angsuran = 4.9M, THP = 17.5M
+    expect(computeThp(PASANGAN_INCOME).thp).toBe(17_500_000);
+  });
+
+  it("Joint THP total = 38_500_000 (21M + 17.5M)", () => {
+    expect(computeJointThp(NASABAH_INCOME, PASANGAN_INCOME).total).toBe(38_500_000);
   });
 });

@@ -3,12 +3,18 @@ export interface OcrBucket { count: number; sum: number; min: number }
 export interface OcrMutasiResult {
   Gaji: OcrBucket; THR: OcrBucket; Bonus: OcrBucket; Insentif: OcrBucket;
 }
-export interface FraudCheck { name: string; passed: boolean; score: number }
-export interface FraudResult { passed: boolean; confidence: number; checks: FraudCheck[] }
-export interface SlikFacility { lender: string; type: string; installment: number }
+
 export interface SlikResult {
-  found: boolean; facilities: SlikFacility[]; totalAngsuran: number; reasoning: string;
+  outstanding: number;        // outstanding kredit
+  angsuranBulanan: number;    // monthly installment → feeds income card Angsuran
+  tunggakan: number;          // arrears
+  status: string;             // e.g. "Lancar"
+  score: number;              // credit score
 }
+
+export interface FraudCheck { name: string; score: number }   // score 0..1
+export interface FraudResult { checks: FraudCheck[]; overall: number }  // overall 0..1
+
 export interface IdentityResult {
-  NIK: string; Nama: string; Gender: 'L' | 'P'; TanggalLahir: string; isPayrollBRI: boolean;
+  NIK: string; Nama: string; Gender: string; TanggalLahir: string;
 }

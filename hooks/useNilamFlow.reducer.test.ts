@@ -11,6 +11,8 @@ import type { CustomerIncome } from "@/types/income";
 // Helpers
 // ---------------------------------------------------------------------------
 
+const UNIFORM_STEPS = ["opening", "income_type", "joint_income", "requirement", "processing", "analyst_decision"];
+
 function makePersona(id: string): PersonaConfig {
   const p = personaById(id);
   if (!p) throw new Error(`Unknown persona id: ${id}`);
@@ -22,19 +24,18 @@ function makeIncome(role: "nasabah" | "pasangan"): CustomerIncome {
     role,
     name: role === "nasabah" ? "Nasabah" : "Pasangan",
     components: [
-      { key: "Gaji", avg: 10_000_000, min: 10_000_000, mode: "avg", weight: 1 },
-      { key: "THR", avg: 20_000_000, min: 20_000_000, mode: "avg", weight: 1 },
-      { key: "Bonus", avg: 30_000_000, min: 10_000_000, mode: "avg", weight: 1 },
-      { key: "Insentif", avg: 1_000_000, min: 1_000_000, mode: "avg", weight: 1 },
+      { key: "Gaji",     avg: 10_000_000, min: 10_000_000, mode: "avg", weight: 1 },
+      { key: "THR",      avg: 20_000_000, min: 20_000_000, mode: "avg", weight: 1 },
+      { key: "Bonus",    avg: 30_000_000, min: 10_000_000, mode: "avg", weight: 1 },
+      { key: "Insentif", avg: 1_000_000,  min: 1_000_000,  mode: "avg", weight: 1 },
     ],
     angsuran: 2_500_000,
   };
 }
 
-function makeEvent(nodeId: string = "slik_retrieval"): OrchestrationEvent {
+function makeEvent(nodeId: string = "slik"): OrchestrationEvent {
   return {
     nodeId: nodeId as OrchestrationEvent["nodeId"],
-    leg: "nasabah",
     status: "running",
     label: "Test node",
     progress: 0.5,
@@ -60,7 +61,7 @@ describe("nilamReducer — selectPersona", () => {
     const prior: NilamState = {
       ...initialState(),
       persona: makePersona("payroll-single"),
-      steps: ["opening", "joint_income", "requirement_nasabah", "processing", "submitted"],
+      steps: UNIFORM_STEPS,
       stepIndex: 2,
       uploads: { slip: true },
       events: [makeEvent()],
@@ -76,30 +77,30 @@ describe("nilamReducer — selectPersona", () => {
     expect(state.pasangan).toBeUndefined();
   });
 
-  it("nonpayroll-joint planFlow contains income_type, joint_income, requirement_nasabah, spouse_identity, spouse_income", () => {
+  it("all personas produce the same 6-step uniform flow", () => {
+    const personaIds = ["payroll-single", "payroll-joint", "nonpayroll-single", "nonpayroll-joint"];
+    for (const id of personaIds) {
+      const persona = makePersona(id);
+      const state = nilamReducer(initialState(), { type: "selectPersona", persona });
+      expect(state.steps).toEqual(UNIFORM_STEPS);
+    }
+  });
+
+  it("nonpayroll-joint planFlow is the uniform 6-step flow", () => {
     const persona = makePersona("nonpayroll-joint");
     const state = nilamReducer(initialState(), { type: "selectPersona", persona });
 
-    expect(state.steps).toEqual([
-      "opening",
-      "income_type",
-      "joint_income",
-      "requirement_nasabah",
-      "spouse_identity",
-      "spouse_income",
-      "processing",
-      "submitted",
-    ]);
+    expect(state.steps).toEqual(UNIFORM_STEPS);
   });
 
-  it("payroll-single planFlow contains joint_income and requirement_nasabah but not income_type", () => {
+  it("payroll-single planFlow is the uniform 6-step flow", () => {
     const persona = makePersona("payroll-single");
     const state = nilamReducer(initialState(), { type: "selectPersona", persona });
 
+    expect(state.steps).toEqual(UNIFORM_STEPS);
+    expect(state.steps).toContain("income_type");
     expect(state.steps).toContain("joint_income");
-    expect(state.steps).toContain("requirement_nasabah");
-    expect(state.steps).not.toContain("income_type");
-    expect(state.steps).not.toContain("document_upload");
+    expect(state.steps).toContain("requirement");
   });
 });
 
@@ -120,9 +121,9 @@ describe("nilamReducer — next", () => {
     expect(s2.stepIndex).toBe(2);
   });
 
-  it("clamps at the last step index — does not go beyond steps.length - 1", () => {
+  it("clamps at the last step index (analyst_decision, idx=5) — does not go beyond", () => {
     const persona = makePersona("payroll-single");
-    // payroll-single: opening, joint_income, requirement_nasabah, processing, submitted → 5 steps, last idx = 4
+    // uniform flow: 6 steps, last idx = 5
     let state = nilamReducer(initialState(), { type: "selectPersona", persona });
 
     // Advance past the last step many times
@@ -131,6 +132,7 @@ describe("nilamReducer — next", () => {
     }
 
     expect(state.stepIndex).toBe(state.steps.length - 1);
+    expect(state.steps[state.stepIndex]).toBe("analyst_decision");
   });
 });
 
@@ -142,7 +144,7 @@ describe("nilamReducer — goBack", () => {
   it("decrements stepIndex by 1 from a normal step", () => {
     const persona = makePersona("payroll-single");
     const s0 = nilamReducer(initialState(), { type: "selectPersona", persona });
-    const s1 = nilamReducer(s0, { type: "next" }); // stepIndex = 1
+    const s1 = nilamReducer(s0, { type: "next" }); // stepIndex = 1 (income_type)
     const s2 = nilamReducer(s1, { type: "goBack" }); // stepIndex → 0
 
     expect(s2.stepIndex).toBe(0);
@@ -159,7 +161,7 @@ describe("nilamReducer — goBack", () => {
   it("does NOT clear events/nasabah/pasangan when leaving a normal step", () => {
     const persona = makePersona("payroll-single");
     let state = nilamReducer(initialState(), { type: "selectPersona", persona });
-    state = nilamReducer(state, { type: "next" }); // stepIndex = 1 (joint_income)
+    state = nilamReducer(state, { type: "next" }); // stepIndex = 1 (income_type)
     state = { ...state, events: [makeEvent()], nasabah: makeIncome("nasabah") };
 
     const after = nilamReducer(state, { type: "goBack" });
@@ -170,7 +172,6 @@ describe("nilamReducer — goBack", () => {
 
   it("clears events, nasabah, pasangan when leaving 'processing' (rollback)", () => {
     const persona = makePersona("nonpayroll-joint");
-    // Manually place state at 'processing' step
     const allSteps = planFlow(persona);
     const processingIdx = allSteps.indexOf("processing");
 
@@ -179,7 +180,7 @@ describe("nilamReducer — goBack", () => {
       steps: allSteps,
       stepIndex: processingIdx,
       uploads: { slip: true },
-      events: [makeEvent(), makeEvent("income_extraction")],
+      events: [makeEvent(), makeEvent("income")],
       nasabah: makeIncome("nasabah"),
       pasangan: makeIncome("pasangan"),
     };
@@ -195,27 +196,27 @@ describe("nilamReducer — goBack", () => {
     expect(after.stepIndex).toBe(processingIdx - 1);
   });
 
-  it("clears events, nasabah, pasangan when leaving 'submitted' (rollback)", () => {
+  it("clears events, nasabah, pasangan when leaving 'analyst_decision' (rollback)", () => {
     const persona = makePersona("payroll-single");
     const allSteps = planFlow(persona);
-    const submittedIdx = allSteps.indexOf("submitted");
+    const analystIdx = allSteps.indexOf("analyst_decision");
 
-    const stateAtSubmitted: NilamState = {
+    const stateAtAnalyst: NilamState = {
       persona,
       steps: allSteps,
-      stepIndex: submittedIdx,
+      stepIndex: analystIdx,
       uploads: {},
       events: [makeEvent()],
       nasabah: makeIncome("nasabah"),
       pasangan: undefined,
     };
 
-    const after = nilamReducer(stateAtSubmitted, { type: "goBack" });
+    const after = nilamReducer(stateAtAnalyst, { type: "goBack" });
 
     expect(after.events).toEqual([]);
     expect(after.nasabah).toBeUndefined();
     expect(after.pasangan).toBeUndefined();
-    expect(after.stepIndex).toBe(submittedIdx - 1);
+    expect(after.stepIndex).toBe(analystIdx - 1);
   });
 });
 
@@ -307,7 +308,7 @@ describe("nilamReducer — reset", () => {
   it("returns to initial state: persona null, steps=['opening'], stepIndex 0", () => {
     const populated: NilamState = {
       persona: makePersona("payroll-joint"),
-      steps: ["opening", "joint_income", "requirement_nasabah", "spouse_identity", "spouse_confirm", "processing", "submitted"],
+      steps: UNIFORM_STEPS,
       stepIndex: 3,
       uploads: { slip: true, mutasi: true },
       events: [makeEvent(), makeEvent()],
@@ -348,11 +349,21 @@ describe("nilamReducer — goTo", () => {
     expect(after.stepIndex).toBe(expectedIdx);
   });
 
-  it("is a no-op for an absent step", () => {
-    const persona = makePersona("payroll-single"); // no 'income_type' in payroll flow
+  it("jumps to analyst_decision correctly", () => {
+    const persona = makePersona("payroll-single");
     const s0 = nilamReducer(initialState(), { type: "selectPersona", persona });
 
-    const after = nilamReducer(s0, { type: "goTo", step: "income_type" });
+    const after = nilamReducer(s0, { type: "goTo", step: "analyst_decision" });
+    expect(after.stepIndex).toBe(5);
+    expect(after.steps[after.stepIndex]).toBe("analyst_decision");
+  });
+
+  it("is a no-op for an absent step (submitted is no longer in flow)", () => {
+    const persona = makePersona("payroll-single");
+    const s0 = nilamReducer(initialState(), { type: "selectPersona", persona });
+
+    // "submitted" no longer exists in the new flow
+    const after = nilamReducer(s0, { type: "goTo", step: "submitted" as never });
     expect(after.stepIndex).toBe(s0.stepIndex);
   });
 });
@@ -363,16 +374,16 @@ describe("nilamReducer — goTo", () => {
 
 describe("nilamReducer — appendEvent", () => {
   it("appends events in order", () => {
-    const e1 = makeEvent("payroll_pull");
-    const e2 = makeEvent("slik_retrieval");
+    const e1 = makeEvent("upload");
+    const e2 = makeEvent("slik");
 
     let state = initialState();
     state = nilamReducer(state, { type: "appendEvent", event: e1 });
     state = nilamReducer(state, { type: "appendEvent", event: e2 });
 
     expect(state.events).toHaveLength(2);
-    expect(state.events[0].nodeId).toBe("payroll_pull");
-    expect(state.events[1].nodeId).toBe("slik_retrieval");
+    expect(state.events[0].nodeId).toBe("upload");
+    expect(state.events[1].nodeId).toBe("slik");
   });
 });
 
@@ -381,7 +392,7 @@ describe("nilamReducer — setIncome", () => {
     const income = makeIncome("nasabah");
     const state = nilamReducer(initialState(), {
       type: "setIncome",
-      leg: "nasabah",
+      role: "nasabah",
       income,
     });
 
@@ -393,11 +404,33 @@ describe("nilamReducer — setIncome", () => {
     const income = makeIncome("pasangan");
     const state = nilamReducer(initialState(), {
       type: "setIncome",
-      leg: "pasangan",
+      role: "pasangan",
       income,
     });
 
     expect(state.pasangan).toBe(income);
     expect(state.nasabah).toBeUndefined();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// setJointAnswer
+// ---------------------------------------------------------------------------
+
+describe("nilamReducer — setJointAnswer", () => {
+  it("sets jointAnswer to 'ya'", () => {
+    const state = nilamReducer(initialState(), { type: "setJointAnswer", answer: "ya" });
+    expect(state.jointAnswer).toBe("ya");
+  });
+
+  it("sets jointAnswer to 'tidak'", () => {
+    const state = nilamReducer(initialState(), { type: "setJointAnswer", answer: "tidak" });
+    expect(state.jointAnswer).toBe("tidak");
+  });
+
+  it("can overwrite a previous jointAnswer", () => {
+    let state = nilamReducer(initialState(), { type: "setJointAnswer", answer: "ya" });
+    state = nilamReducer(state, { type: "setJointAnswer", answer: "tidak" });
+    expect(state.jointAnswer).toBe("tidak");
   });
 });
