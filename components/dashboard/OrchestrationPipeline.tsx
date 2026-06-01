@@ -45,7 +45,7 @@ const NODE_ICONS: Record<NodeId, React.ComponentType<{ size?: number; className?
  */
 export function OrchestrationPipeline({ statusOf }: OrchestrationPipelineProps) {
   return (
-    <div className="rounded-xl bg-white p-2 shadow-soft ring-1 ring-bri-line">
+    <div className="rounded-xl border border-bri-line bg-white p-2 shadow-soft">
       {/* Section label */}
       <span className="mb-2 block text-[9px] font-semibold uppercase tracking-[0.12em] text-bri-muted">
         AI Orchestration Pipeline

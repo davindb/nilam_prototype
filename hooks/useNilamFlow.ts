@@ -9,7 +9,7 @@ import { planFlow } from "@/engines/persona/personaEngine";
 import { WorkflowOrchestrator } from "@/engines/orchestrator/workflowOrchestrator";
 import { DEFAULT_PERSONA } from "@/data/personas";
 import { SLIP_GAJI, MUTASI, IDENTITY_PASANGAN } from "@/data/ocrFixtures";
-import { SLIK_NASABAH } from "@/data/slikFixtures";
+import { SLIK_NASABAH, SLIK_PASANGAN } from "@/data/slikFixtures";
 import { FRAUD_RESULT } from "@/data/fraudFixtures";
 import { NASABAH_INCOME, PASANGAN_INCOME } from "@/data/incomeFixtures";
 
@@ -269,7 +269,7 @@ export function useNilamFlow() {
       validasi: { monthsVerified: 12, complete: true },
       fraud:    FRAUD_RESULT,
       identity: joint ? IDENTITY_PASANGAN : null,
-      slik:     SLIK_NASABAH,
+      slik:     { nasabah: SLIK_NASABAH, pasangan: joint ? SLIK_PASANGAN : undefined },
       income:   {
         nasabah: NASABAH_INCOME,
         pasangan: joint ? PASANGAN_INCOME : undefined,

@@ -88,23 +88,23 @@ function JsonBlock({
  * Content is hidden (shows "Menunggu OCR…") when ocrStatus === "idle".
  */
 export function OcrJsonCard({ ocrStatus, slip, mutasi }: OcrJsonCardProps) {
-  const isIdle = ocrStatus === "idle";
+  const isDone = ocrStatus === "success";
 
   return (
-    <div className="flex flex-1 flex-col rounded-xl bg-white p-2 shadow-soft ring-1 ring-bri-line min-h-0">
+    <div className="flex flex-1 flex-col rounded-xl border border-bri-line bg-white p-2 shadow-soft min-h-0">
       {/* Section label */}
-      <span className="mb-1.5 block text-[9px] font-semibold uppercase tracking-[0.12em] text-bri-muted">
+      <span className="mb-1.5 block shrink-0 text-[9px] font-semibold uppercase tracking-[0.12em] text-bri-muted">
         OCR Result (JSON)
       </span>
 
-      {isIdle ? (
-        <div className="flex flex-1 items-center justify-center">
-          <span className="text-[10px] text-bri-muted/40 italic">Menunggu OCR…</span>
-        </div>
-      ) : (
+      {isDone ? (
         <div className="flex flex-1 gap-2 min-h-0">
           <JsonBlock title="Slip Gaji" data={slip} />
           <JsonBlock title="Mutasi Rekening" data={mutasi} />
+        </div>
+      ) : (
+        <div className="flex flex-1 items-center justify-center">
+          <span className="text-[10px] text-bri-muted/40 italic">Menunggu hasil ekstraksi…</span>
         </div>
       )}
     </div>

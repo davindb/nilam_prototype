@@ -54,10 +54,10 @@ export function BehindTheScene({
   const ocrStatus = statusOf("ocr");
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-2 overflow-hidden p-2">
+    <div className="flex h-full min-h-0 flex-col gap-3 overflow-hidden bg-[#F5F7FA] p-3">
 
       {/* ── ROW A — flex-[4]: Persona | Pipeline+OCR ──────────────────── */}
-      <div className="flex min-h-0 flex-[4] gap-2 overflow-hidden">
+      <div className="flex min-h-0 flex-[4] gap-3 overflow-hidden">
         {/* Narrow left: persona selector — fixed width, full row height */}
         <PersonaSelector
           persona={persona}
@@ -67,14 +67,14 @@ export function BehindTheScene({
         />
 
         {/* Right column: pipeline stacked above OCR row */}
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-2 overflow-hidden">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-3 overflow-hidden">
           {/* AI Orchestration Pipeline — shrink-0: it's small, let it breathe */}
           <div className="shrink-0">
             <OrchestrationPipeline statusOf={statusOf} />
           </div>
 
           {/* OCR row fills remaining height: Processing (~40%) + JSON (~60%) */}
-          <div className="flex min-h-0 flex-1 gap-2 overflow-hidden">
+          <div className="flex min-h-0 flex-1 gap-3 overflow-hidden">
             <div className="w-[40%] shrink-0 overflow-hidden">
               <OcrProcessingCard ocrStatus={ocrStatus} />
             </div>
@@ -90,7 +90,7 @@ export function BehindTheScene({
       </div>
 
       {/* ── ROW B — flex-[3]: Fraud · Identity · SLIK ───────────────── */}
-      <div className="grid min-h-0 flex-[3] grid-cols-3 gap-2 overflow-hidden">
+      <div className="grid min-h-0 flex-[3] grid-cols-3 gap-3 overflow-hidden">
         <FraudDetectionCard
           status={statusOf("fraud")}
           result={latest.get("fraud")?.output as FraudResult | undefined}
@@ -102,22 +102,17 @@ export function BehindTheScene({
         />
         <SlikRetrievalCard
           status={statusOf("slik")}
-          slik={latest.get("slik")?.output as SlikResult | undefined}
+          slik={latest.get("slik")?.output as { nasabah: SlikResult; pasangan?: SlikResult } | undefined}
         />
       </div>
 
-      {/* ── ROW C — flex-[3]: Income Nasabah · THP · Income Pasangan ── */}
-      <div className="grid min-h-0 flex-[3] grid-cols-3 gap-2 overflow-hidden">
+      {/* ── ROW C — flex-[3]: Income Nasabah · Income Pasangan · THP ── */}
+      <div className="grid min-h-0 flex-[3] grid-cols-3 gap-3 overflow-hidden">
         <IncomeComponentsCard
           title="INCOME COMPONENTS - NASABAH"
           income={nasabah}
           onMode={(k, m) => setComponentMode("nasabah", k, m)}
           onWeight={(k, w) => setComponentWeight("nasabah", k, w)}
-        />
-        <ThpEngineCard
-          nasabah={nasabah}
-          pasangan={pasangan}
-          isJoint={isJoint}
         />
         <IncomeComponentsCard
           title="INCOME COMPONENTS - PASANGAN"
@@ -125,6 +120,11 @@ export function BehindTheScene({
           stripped={!isJoint}
           onMode={(k, m) => setComponentMode("pasangan", k, m)}
           onWeight={(k, w) => setComponentWeight("pasangan", k, w)}
+        />
+        <ThpEngineCard
+          nasabah={nasabah}
+          pasangan={pasangan}
+          isJoint={isJoint}
         />
       </div>
     </div>

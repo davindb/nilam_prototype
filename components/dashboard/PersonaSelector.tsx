@@ -25,7 +25,7 @@ export function PersonaSelector({
   onReset,
 }: PersonaSelectorProps) {
   return (
-    <div className="flex w-[180px] shrink-0 flex-col rounded-xl bg-white shadow-soft ring-1 ring-bri-line">
+    <div className="flex w-[180px] shrink-0 flex-col rounded-xl border border-bri-line bg-white shadow-soft">
       {/* Section label */}
       <div className="px-2.5 pb-1 pt-2">
         <span className="text-[9px] font-semibold uppercase tracking-[0.12em] text-bri-muted">

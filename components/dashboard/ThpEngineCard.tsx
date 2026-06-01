@@ -25,14 +25,16 @@ function AnimatedThp({
 }
 
 /**
- * ThpEngineCard — Row C, center column.
- * Shows the formula chips, THP Nasabah, THP Pasangan, and THP Total.
- * All numbers animate on change via useCountUp.
+ * ThpEngineCard — Row C, rightmost column.
+ *
+ * Layout: flex h-full flex-col so card fills its grid cell.
+ * Header shrink-0; body flex-1 with justify-between so:
+ *   RUMUS chips → THP Nasabah/Pasangan boxes → THP Total
+ * are evenly distributed to fill the card height with no empty hole.
  */
 export function ThpEngineCard({ nasabah, pasangan, isJoint }: ThpEngineCardProps) {
   const pending = !nasabah;
 
-  // Compute live values (safe defaults if pending)
   const nThp = nasabah ? computeThp(nasabah) : null;
   const pThp = pasangan ? computeThp(pasangan) : null;
   const joint = nasabah ? computeJointThp(nasabah, isJoint ? pasangan : undefined) : null;
@@ -41,7 +43,6 @@ export function ThpEngineCard({ nasabah, pasangan, isJoint }: ThpEngineCardProps
   const pasanganThp = pThp?.thp ?? 0;
   const totalThp = joint?.total ?? 0;
 
-  // Formula chips: one per component + angsuran
   const formulaChips = nThp
     ? [
         { label: "Adj. Gaji",     value: nThp.adjusted["Gaji"],     type: "income" as const },
@@ -53,20 +54,21 @@ export function ThpEngineCard({ nasabah, pasangan, isJoint }: ThpEngineCardProps
     : [];
 
   return (
-    <div className="flex flex-col rounded-xl bg-white px-2 py-1.5 shadow-soft ring-1 ring-bri-line min-h-0">
+    <div className="flex h-full flex-col rounded-xl border border-bri-line bg-white px-2 py-1.5 shadow-soft">
       {/* Header */}
-      <span className="mb-1 block text-[8px] font-semibold uppercase tracking-[0.12em] text-bri-muted leading-none">
+      <span className="mb-1 block shrink-0 text-[8px] font-semibold uppercase tracking-[0.12em] text-bri-muted leading-none">
         THP Calculation Engine
       </span>
 
       {pending ? (
-        <div className="flex flex-1 items-center justify-center py-4">
+        <div className="flex flex-1 items-center justify-center">
           <span className="text-[9px] italic text-bri-muted/40">Menunggu…</span>
         </div>
       ) : (
-        <>
+        /* Body — flex-1 with justify-between: RUMUS | THP boxes | Total */
+        <div className="flex flex-1 flex-col justify-between gap-1">
           {/* RUMUS (formula chips) */}
-          <div className="mb-1.5">
+          <div>
             <span className="text-[7px] font-semibold uppercase tracking-wider text-bri-muted">
               Rumus
             </span>
@@ -102,7 +104,7 @@ export function ThpEngineCard({ nasabah, pasangan, isJoint }: ThpEngineCardProps
           </div>
 
           {/* THP boxes row */}
-          <div className="mb-1 grid grid-cols-2 gap-1">
+          <div className="grid grid-cols-2 gap-1">
             {/* THP Nasabah */}
             <div className="rounded-lg border border-bri-navy/20 bg-bri-bg p-1.5">
               <span className="block text-[7px] font-semibold uppercase text-bri-muted leading-none mb-0.5">
@@ -137,7 +139,7 @@ export function ThpEngineCard({ nasabah, pasangan, isJoint }: ThpEngineCardProps
             </div>
           </div>
 
-          {/* THP Total — headline */}
+          {/* THP Total — headline, pinned at bottom */}
           <div className="rounded-lg border border-bri-navy/25 bg-gradient-to-br from-bri-bg to-bri-bg/60 p-1.5">
             <span className="block text-[7px] font-semibold uppercase text-bri-muted leading-none mb-0.5">
               {isJoint ? "THP Total (Joint Income)" : "THP Total"}
@@ -147,7 +149,7 @@ export function ThpEngineCard({ nasabah, pasangan, isJoint }: ThpEngineCardProps
               className="block text-[16px] font-extrabold text-bri-navy leading-tight"
             />
           </div>
-        </>
+        </div>
       )}
     </div>
   );
