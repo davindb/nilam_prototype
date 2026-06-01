@@ -7,9 +7,9 @@ import type { CustomerIncome, ComponentKey, ComponentMode } from "@/types/income
 import type { EventListener } from "@/engines/orchestrator/events";
 import { planFlow } from "@/engines/persona/personaEngine";
 import { WorkflowOrchestrator } from "@/engines/orchestrator/workflowOrchestrator";
-import { personaById } from "@/data/personas";
+import { DEFAULT_PERSONA } from "@/data/personas";
 import { SLIP_GAJI, MUTASI, IDENTITY_PASANGAN } from "@/data/ocrFixtures";
-import { SLIK_NASABAH, SLIK_PASANGAN } from "@/data/slikFixtures";
+import { SLIK_NASABAH } from "@/data/slikFixtures";
 import { FRAUD_RESULT } from "@/data/fraudFixtures";
 import { NASABAH_INCOME, PASANGAN_INCOME } from "@/data/incomeFixtures";
 
@@ -18,10 +18,10 @@ import { NASABAH_INCOME, PASANGAN_INCOME } from "@/data/incomeFixtures";
 // ---------------------------------------------------------------------------
 
 export interface NilamState {
-  persona: PersonaConfig | null;
+  persona: PersonaConfig;
   steps: FlowStep[];
   stepIndex: number;
-  jointAnswer?: "ya" | "tidak";
+  jointAnswer: "ya" | "tidak" | null;
   uploads: Record<string, boolean>;
   events: OrchestrationEvent[];
   nasabah?: CustomerIncome;
@@ -33,7 +33,8 @@ export interface NilamState {
 // ---------------------------------------------------------------------------
 
 export type NilamAction =
-  | { type: "selectPersona"; persona: PersonaConfig }
+  | { type: "setNasabahPayroll"; value: boolean }
+  | { type: "setPasanganPayroll"; value: boolean }
   | { type: "next" }
   | { type: "goTo"; step: FlowStep }
   | { type: "goBack" }
@@ -50,10 +51,27 @@ export type NilamAction =
 
 export function initialState(): NilamState {
   return {
-    persona: null,
-    steps: ["opening"],
+    persona: DEFAULT_PERSONA,
+    steps: planFlow(DEFAULT_PERSONA),
     stepIndex: 0,
-    jointAnswer: undefined,
+    jointAnswer: null,
+    uploads: {},
+    events: [],
+    nasabah: undefined,
+    pasangan: undefined,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Helper: reset flow fields but keep persona patch applied
+// ---------------------------------------------------------------------------
+
+function resetWithPersona(persona: PersonaConfig): NilamState {
+  return {
+    persona,
+    steps: planFlow(persona),
+    stepIndex: 0,
+    jointAnswer: null,
     uploads: {},
     events: [],
     nasabah: undefined,
@@ -67,13 +85,15 @@ export function initialState(): NilamState {
 
 export function nilamReducer(state: NilamState, action: NilamAction): NilamState {
   switch (action.type) {
-    case "selectPersona":
-      return {
-        ...initialState(),
-        persona: action.persona,
-        steps: planFlow(action.persona),
-        stepIndex: 0,
-      };
+    case "setNasabahPayroll": {
+      const persona: PersonaConfig = { ...state.persona, nasabahPayroll: action.value };
+      return resetWithPersona(persona);
+    }
+
+    case "setPasanganPayroll": {
+      const persona: PersonaConfig = { ...state.persona, pasanganPayroll: action.value };
+      return resetWithPersona(persona);
+    }
 
     case "next":
       return {
@@ -165,6 +185,7 @@ export function useNilamFlow() {
 
   // Derived state
   const currentStep = state.steps[state.stepIndex];
+  const isJoint = state.jointAnswer === "ya";
   const canGoBack =
     state.stepIndex > 0 &&
     currentStep !== "processing" &&
@@ -174,12 +195,18 @@ export function useNilamFlow() {
   // Public actions
   // -------------------------------------------------------------------------
 
-  const selectPersona = useCallback(
-    (id: string) => {
-      const persona = personaById(id);
-      if (!persona) return;
+  const setNasabahPayroll = useCallback(
+    (v: boolean) => {
       cancelOrchestrator();
-      dispatch({ type: "selectPersona", persona });
+      dispatch({ type: "setNasabahPayroll", value: v });
+    },
+    [cancelOrchestrator]
+  );
+
+  const setPasanganPayroll = useCallback(
+    (v: boolean) => {
+      cancelOrchestrator();
+      dispatch({ type: "setPasanganPayroll", value: v });
     },
     [cancelOrchestrator]
   );
@@ -229,11 +256,11 @@ export function useNilamFlow() {
   // -------------------------------------------------------------------------
 
   const submit = useCallback(() => {
-    const persona = state.persona;
-    if (!persona) return;
-
     // Cancel any in-flight orchestrator before starting a new run.
     cancelOrchestrator();
+
+    // Derive joint at submit time from current state.jointAnswer
+    const joint = state.jointAnswer === "ya";
 
     // Build outputs keyed by NodeId
     const outputs: Partial<Record<NodeId, unknown>> = {
@@ -241,11 +268,11 @@ export function useNilamFlow() {
       ocr:      { slip: SLIP_GAJI, mutasi: MUTASI },
       validasi: { monthsVerified: 12, complete: true },
       fraud:    FRAUD_RESULT,
-      identity: persona.isJointIncome ? IDENTITY_PASANGAN : null,
+      identity: joint ? IDENTITY_PASANGAN : null,
       slik:     SLIK_NASABAH,
       income:   {
         nasabah: NASABAH_INCOME,
-        pasangan: persona.isJointIncome ? PASANGAN_INCOME : undefined,
+        pasangan: joint ? PASANGAN_INCOME : undefined,
       },
       thp:      null,
     };
@@ -271,30 +298,32 @@ export function useNilamFlow() {
 
     // Run the pipeline. Only advance to `analyst_decision` if this specific
     // orchestrator instance is still the active one.
-    orch.run(persona, outputs, emit).then(() => {
+    orch.run(state.persona, outputs, emit).then(() => {
       if (orchestratorRef.current === orch) {
         dispatch({ type: "goTo", step: "analyst_decision" });
       }
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.persona, cancelOrchestrator]);
+  }, [state.persona, state.jointAnswer, cancelOrchestrator]);
 
   return {
     persona: state.persona,
+    jointAnswer: state.jointAnswer,
+    isJoint,
     steps: state.steps,
     currentStep,
     stepIndex: state.stepIndex,
     canGoBack,
-    jointAnswer: state.jointAnswer,
     uploads: state.uploads,
     events: state.events,
     nasabah: state.nasabah,
     pasangan: state.pasangan,
-    selectPersona,
+    setNasabahPayroll,
+    setPasanganPayroll,
+    setJointAnswer,
     start,
     next,
     goBack,
-    setJointAnswer,
     setUpload,
     submit,
     setComponentMode,

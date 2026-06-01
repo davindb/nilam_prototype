@@ -32,7 +32,7 @@ export class WorkflowOrchestrator {
    * cancel() is reset at the start of each run() so the same instance is reusable.
    */
   async run(
-    persona: PersonaConfig,
+    persona: PersonaConfig | undefined,
     outputs: Partial<Record<NodeId, unknown>>,
     emit: EventListener,
   ): Promise<void> {

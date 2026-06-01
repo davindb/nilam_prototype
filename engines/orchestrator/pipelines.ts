@@ -12,6 +12,6 @@ export const PIPELINE_NODES: { nodeId: NodeId; label: string }[] = [
   { nodeId: "thp",      label: "THP Engine" },
 ];
 
-export function buildPipeline(_p: PersonaConfig) {
+export function buildPipeline(_p?: PersonaConfig) {
   return PIPELINE_NODES;
 }

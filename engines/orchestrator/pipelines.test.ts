@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { PIPELINE_NODES, buildPipeline } from "./pipelines";
-import { PERSONAS } from "@/data/personas";
+import { DEFAULT_PERSONA } from "@/data/personas";
 
 const EXPECTED_ORDER = ["upload", "ocr", "validasi", "fraud", "identity", "slik", "income", "thp"];
 
@@ -47,16 +47,31 @@ describe("PIPELINE_NODES", () => {
 });
 
 describe("buildPipeline", () => {
-  it("returns the same 8 nodes for all personas (uniform pipeline)", () => {
-    for (const persona of PERSONAS) {
-      const nodes = buildPipeline(persona);
-      expect(nodes.map((n) => n.nodeId)).toEqual(EXPECTED_ORDER);
-    }
+  it("returns the 8-node uniform pipeline for DEFAULT_PERSONA", () => {
+    const nodes = buildPipeline(DEFAULT_PERSONA);
+    expect(nodes.map((n) => n.nodeId)).toEqual(EXPECTED_ORDER);
   });
 
-  it("returns PIPELINE_NODES reference for any persona", () => {
-    for (const persona of PERSONAS) {
-      expect(buildPipeline(persona)).toBe(PIPELINE_NODES);
-    }
+  it("returns PIPELINE_NODES reference for DEFAULT_PERSONA", () => {
+    expect(buildPipeline(DEFAULT_PERSONA)).toBe(PIPELINE_NODES);
+  });
+
+  it("returns the 8-node uniform pipeline for nasabahPayroll=false, pasanganPayroll=false", () => {
+    const nodes = buildPipeline({ nasabahPayroll: false, pasanganPayroll: false });
+    expect(nodes.map((n) => n.nodeId)).toEqual(EXPECTED_ORDER);
+  });
+
+  it("returns the 8-node uniform pipeline for nasabahPayroll=true, pasanganPayroll=true", () => {
+    const nodes = buildPipeline({ nasabahPayroll: true, pasanganPayroll: true });
+    expect(nodes.map((n) => n.nodeId)).toEqual(EXPECTED_ORDER);
+  });
+
+  it("returns the 8-node uniform pipeline with no argument", () => {
+    const nodes = buildPipeline();
+    expect(nodes.map((n) => n.nodeId)).toEqual(EXPECTED_ORDER);
+  });
+
+  it("returns PIPELINE_NODES reference with no argument", () => {
+    expect(buildPipeline()).toBe(PIPELINE_NODES);
   });
 });
