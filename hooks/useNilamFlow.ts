@@ -220,14 +220,17 @@ export function useNilamFlow() {
   // -------------------------------------------------------------------------
 
   const submit = useCallback(() => {
-    // Snapshot persona at call time — reducer state captured via closure.
-    // We must read state.persona from the latest render via a ref pattern,
-    // but since submit() is called by user interaction (not inside an effect),
-    // reading `state` directly from the useCallback closure is fine if we
-    // accept the re-creation on every render. We use the "latest ref" pattern
-    // to avoid stale closure issues without over-creating the callback.
     const persona = state.persona;
     if (!persona) return;
+
+    // Cancel any in-flight orchestrator before starting a new run, so a
+    // double-tap cannot leave a previous orchestrator emitting ghost
+    // `appendEvent`/`setIncome` dispatches into the new run's state.
+    cancelOrchestrator();
+
+    // `submit` is re-created whenever `persona` changes (see dep array below),
+    // so the `persona` captured here is always the latest selected persona.
+    // All other inputs (MUTASI, SLIK_*, KTP_PASANGAN, ...) are module-level constants.
 
     // Build income values using SLIK totals for angsuran.
     const incomeN = extractIncome("nasabah", "Nasabah", MUTASI, SLIK_NASABAH.totalAngsuran);
@@ -235,6 +238,8 @@ export function useNilamFlow() {
       ? extractIncome("pasangan", KTP_PASANGAN.Nama, SPOUSE_MUTASI, SLIK_PASANGAN.totalAngsuran)
       : undefined;
 
+    // `thp_computation` intentionally has no entry here — THP is computed live
+    // from the income components in the cards, not pre-computed at submit time.
     // Build full outputs map — over-including is fine; orchestrator reads by key.
     const outputs: Record<string, unknown> = {
       [nodeKey("nasabah", "payroll_pull")]: { source: "BRI Payroll", mutasi: MUTASI },
@@ -243,6 +248,8 @@ export function useNilamFlow() {
       [nodeKey("nasabah", "fraud_screening")]: screen("dokumen nasabah"),
       [nodeKey("nasabah", "slik_retrieval")]: SLIK_NASABAH,
       [nodeKey("nasabah", "income_extraction")]: incomeN,
+      [nodeKey("nasabah", "doc_validation")]: { monthsVerified: 12, complete: true },
+      [nodeKey("nasabah", "doc_classification")]: { documents: ["Slip Gaji", "Mutasi 12 Bulan"], quality: "baik" },
       [nodeKey("pasangan", "identity_ocr")]: KTP_PASANGAN,
       [nodeKey("pasangan", "liveness_selfie")]: livenessMatch(),
       [nodeKey("pasangan", "ocr_slip")]: SPOUSE_SLIP_GAJI,
@@ -282,8 +289,9 @@ export function useNilamFlow() {
     });
   // We intentionally include state.persona so submit() always uses the
   // current persona. The callback is re-created when persona changes.
+  // cancelOrchestrator is a stable useCallback([]) — safe to include.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.persona]);
+  }, [state.persona, cancelOrchestrator]);
 
   return {
     persona: state.persona,
