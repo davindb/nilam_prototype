@@ -90,6 +90,23 @@ describe("buildPipeline", () => {
     it("ends with thp_computation", () => {
       expect(nodes[nodes.length - 1].nodeId).toBe("thp_computation");
     });
+
+    it("has exact full node chain", () => {
+      const chain = nodes.map((n) => `${n.leg}:${n.nodeId}`);
+      expect(chain).toEqual([
+        "nasabah:payroll_pull",
+        "nasabah:slik_retrieval",
+        "nasabah:income_extraction",
+        "pasangan:identity_ocr",
+        "pasangan:liveness_selfie",
+        "pasangan:ocr_slip",
+        "pasangan:ocr_mutasi",
+        "pasangan:fraud_screening",
+        "pasangan:slik_retrieval",
+        "pasangan:income_extraction",
+        "nasabah:thp_computation",
+      ]);
+    });
   });
 
   describe("nonpayroll-single", () => {

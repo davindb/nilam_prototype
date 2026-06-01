@@ -8,6 +8,6 @@ export interface CustomerIncome {
   role: 'nasabah' | 'pasangan'; name: string; components: IncomeComponent[]; angsuran: number;
 }
 export interface ThpResult {
-  adjusted: Record<string, number>; grossBeforeAngsuran: number; angsuran: number; thp: number;
+  adjusted: Record<ComponentKey, number>; grossBeforeAngsuran: number; angsuran: number; thp: number;
 }
 export interface JointThp { nasabah: ThpResult; pasangan?: ThpResult; total: number; }

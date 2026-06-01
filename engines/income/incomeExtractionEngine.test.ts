@@ -42,4 +42,16 @@ describe("extractIncome", () => {
     expect(result.role).toBe("pasangan");
     expect(result.name).toBe("Damar Pratama");
   });
+
+  it("produces exactly 4 components", () => {
+    const result = extractIncome("nasabah", "Nasabah", MUTASI, 2_500_000);
+    expect(result.components.length).toBe(4);
+  });
+
+  it("correctly maps THR bucket to avg and min", () => {
+    const result = extractIncome("nasabah", "Nasabah", MUTASI, 2_500_000);
+    const thr = result.components.find((c) => c.key === "THR");
+    expect(thr?.avg).toBe(20_000_000);
+    expect(thr?.min).toBe(20_000_000);
+  });
 });

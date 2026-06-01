@@ -32,6 +32,14 @@ describe("computeThp", () => {
     expect(r.thp).toBe(58_500_000);
     expect(r.adjusted.Gaji).toBe(10_000_000);
   });
+
+  it("uses min value when mode is min", () => {
+    const cust: CustomerIncome = {
+      role: "nasabah", name: "Test", angsuran: 0,
+      components: [{ key: "Gaji", avg: 10_000_000, min: 7_000_000, mode: "min", weight: 1 }],
+    };
+    expect(computeThp(cust).thp).toBe(7_000_000);
+  });
 });
 
 describe("computeJointThp", () => {

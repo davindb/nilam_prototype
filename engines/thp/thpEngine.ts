@@ -1,4 +1,4 @@
-import type { CustomerIncome, IncomeComponent, ThpResult, JointThp } from "@/types/income";
+import type { CustomerIncome, ComponentKey, IncomeComponent, ThpResult, JointThp } from "@/types/income";
 
 export function adjusted(c: IncomeComponent): number {
   const base = c.mode === "avg" ? c.avg : c.min;
@@ -6,14 +6,14 @@ export function adjusted(c: IncomeComponent): number {
 }
 
 export function computeThp(cust: CustomerIncome): ThpResult {
-  const adj: Record<string, number> = {};
+  const adj: Partial<Record<ComponentKey, number>> = {};
   let gross = 0;
   for (const c of cust.components) {
     const v = adjusted(c);
     adj[c.key] = v;
     gross += v;
   }
-  return { adjusted: adj, grossBeforeAngsuran: gross, angsuran: cust.angsuran, thp: gross - cust.angsuran };
+  return { adjusted: adj as Record<ComponentKey, number>, grossBeforeAngsuran: gross, angsuran: cust.angsuran, thp: gross - cust.angsuran };
 }
 
 export function computeJointThp(nasabah: CustomerIncome, pasangan?: CustomerIncome): JointThp {

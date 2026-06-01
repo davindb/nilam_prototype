@@ -1,4 +1,4 @@
-import type { OcrSlipResult, OcrMutasiResult } from "@/types/engines";
+import type { OcrSlipResult, OcrMutasiResult, IdentityResult } from "@/types/engines";
 
 export const SLIP_GAJI: OcrSlipResult = { Gaji: 10_000_000 };
 export const MUTASI: OcrMutasiResult = {
@@ -14,4 +14,4 @@ export const SPOUSE_MUTASI: OcrMutasiResult = {
   Bonus: { count: 2, sum: 24_000_000, min: 5_000_000 },
   Insentif: { count: 6, sum: 4_800_000, min: 500_000 },
 };
-export const KTP_PASANGAN = { NIK: "3201234567890002", Nama: "Damar Pratama", Gender: "L" as const, TanggalLahir: "1989-04-12", isPayrollBRI: false };
+export const KTP_PASANGAN: IdentityResult = { NIK: "3201234567890002", Nama: "Damar Pratama", Gender: "L", TanggalLahir: "1989-04-12", isPayrollBRI: false };

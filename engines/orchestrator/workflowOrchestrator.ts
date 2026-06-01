@@ -3,6 +3,7 @@ import type { NodeId } from "@/types/orchestration";
 import { nodeKey } from "@/types/orchestration";
 import { buildPipeline } from "./pipelines";
 import type { EventListener } from "./events";
+import { FRAUD_CONFIDENCE, LIVENESS_CONFIDENCE } from "@/engines/fraud/fraudEngine";
 
 const REASONING: Partial<Record<NodeId, string>> = {
   payroll_pull: "Mengambil data payroll & profil internal nasabah dari core banking BRI…",
@@ -39,6 +40,8 @@ export class WorkflowOrchestrator {
     outputs: Record<string, unknown>,
     emit: EventListener,
   ): Promise<void> {
+    // Reset so each run() starts fresh; without this a cancelled instance is permanently dead.
+    this.cancelled = false;
     const nodes = buildPipeline(persona);
     for (const node of nodes) {
       if (this.cancelled) return;
@@ -53,7 +56,7 @@ export class WorkflowOrchestrator {
       if (this.cancelled) return;
 
       const confidence =
-        node.group === "fraud" ? 0.985 : node.group === "identity" ? 0.971 : undefined;
+        node.group === "fraud" ? FRAUD_CONFIDENCE : node.group === "identity" ? LIVENESS_CONFIDENCE : undefined;
       emit({
         ...base,
         status: "success",
