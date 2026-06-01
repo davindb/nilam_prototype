@@ -35,19 +35,19 @@ function getActiveIndex(step: FlowStep): number {
 }
 
 /**
- * Horizontal flow stepper rendered BELOW the iPhone.
+ * Horizontal flow stepper rendered BELOW the iPhone — SOFIA/BRI theme.
  * 5 numbered circles connected by dotted lines, with tiny labels underneath.
  *
  * Node states:
- *   done   = filled blue, white check icon (nodes before active)
- *   active = filled nx.blue, white number (bold)
- *   future = white bg, gray border, gray number
+ *   done   = filled bri-navy, white check icon
+ *   active = filled bri-navy, white number (bold) + soft glow ring
+ *   future = white bg, bri-line border, bri-muted number
  */
 export function FlowStepper({ currentStep }: FlowStepperProps) {
   const activeIdx = getActiveIndex(currentStep);
 
   return (
-    <div className="flex shrink-0 items-start justify-center gap-0 pt-2">
+    <div className="flex shrink-0 items-start justify-center gap-0">
       {NODES.map((node, i) => {
         const isDone   = i < activeIdx;
         const isActive = i === activeIdx;
@@ -61,14 +61,14 @@ export function FlowStepper({ currentStep }: FlowStepperProps) {
                 className={cn(
                   "flex h-7 w-7 items-center justify-center rounded-full text-[11px] font-bold transition-all",
                   isDone
-                    ? "bg-nx-blue text-white"
+                    ? "bg-bri-navy text-white"
                     : isActive
-                    ? "bg-nx-blue text-white shadow-md"
-                    : "border-2 border-gray-300 bg-white text-gray-400"
+                    ? "bg-bri-navy text-white"
+                    : "border-2 border-bri-line bg-white text-bri-muted"
                 )}
                 style={
                   isActive
-                    ? { boxShadow: "0 0 0 3px rgba(37,99,235,0.18)" }
+                    ? { boxShadow: "0 0 0 3px rgba(0,82,156,0.18)" }
                     : undefined
                 }
               >
@@ -85,10 +85,10 @@ export function FlowStepper({ currentStep }: FlowStepperProps) {
                   className={cn(
                     "block text-[8px] leading-tight",
                     isActive
-                      ? "font-semibold text-nx-blue"
+                      ? "font-semibold text-bri-navy"
                       : isDone
-                      ? "font-medium text-nx-blue"
-                      : "text-gray-400"
+                      ? "font-medium text-bri-blue"
+                      : "text-bri-muted"
                   )}
                   style={{ maxWidth: 40 }}
                 >
@@ -99,10 +99,10 @@ export function FlowStepper({ currentStep }: FlowStepperProps) {
                     className={cn(
                       "block text-[8px] leading-tight",
                       isActive
-                        ? "font-semibold text-nx-blue"
+                        ? "font-semibold text-bri-navy"
                         : isDone
-                        ? "font-medium text-nx-blue"
-                        : "text-gray-400"
+                        ? "font-medium text-bri-blue"
+                        : "text-bri-muted"
                     )}
                   >
                     {node.sublabel}
@@ -118,7 +118,7 @@ export function FlowStepper({ currentStep }: FlowStepperProps) {
                 style={{
                   width: 16,
                   height: 2,
-                  borderTop: `2px dotted ${i < activeIdx ? "#2563EB" : "#D1D5DB"}`,
+                  borderTop: `2px dotted ${i < activeIdx ? "#00529C" : "#E5E7EB"}`,
                   minWidth: 10,
                   maxWidth: 20,
                 }}

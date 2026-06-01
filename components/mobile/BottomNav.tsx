@@ -21,21 +21,21 @@ export function BottomNav() {
   ];
 
   return (
-    <div className="flex shrink-0 items-center justify-around border-t border-nx-line bg-white px-1 py-1.5">
+    <div className="flex shrink-0 items-center justify-around border-t border-bri-line bg-white px-1 py-1.5">
       {items.map((item) => (
         <button
           key={item.label}
           type="button"
           className={cn(
             "flex flex-col items-center gap-0.5 px-2 py-0.5 transition-colors",
-            item.active ? "text-nx-blue" : "text-nx-muted"
+            item.active ? "text-bri-navy" : "text-bri-muted"
           )}
         >
           {item.icon}
           <span
             className={cn(
               "text-[8px] font-medium leading-tight",
-              item.active ? "text-nx-blue" : "text-nx-muted"
+              item.active ? "text-bri-navy" : "text-bri-muted"
             )}
           >
             {item.label}

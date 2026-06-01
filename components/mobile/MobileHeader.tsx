@@ -1,21 +1,21 @@
 import { Menu } from "lucide-react";
 
 /**
- * In-screen top header bar:
- *   LEFT  — small NILAM cube logo + "NILAM" (blue, bold)
- *   RIGHT — hamburger Menu icon (gray)
- * Thin bottom border separates it from screen content.
+ * In-screen top header bar — SOFIA/BRI theme.
+ *   LEFT  — small BRI navy→sky cube logo + "NILAM" (bri-navy, bold)
+ *   RIGHT — hamburger Menu icon (bri-muted)
+ * Thin bottom border (bri-line) separates it from screen content.
  */
 export function MobileHeader() {
   return (
-    <div className="flex shrink-0 items-center justify-between border-b border-nx-line bg-white px-3 py-2">
+    <div className="flex shrink-0 items-center justify-between border-b border-bri-line bg-white px-3 py-2">
       {/* Logo + wordmark */}
       <div className="flex items-center gap-1.5">
-        {/* Small cube logo — matches AppHeader design, smaller */}
+        {/* Small cube logo — BRI navy→sky, matches AppHeader */}
         <div
           className="flex h-5 w-5 items-center justify-center rounded"
           style={{
-            background: "linear-gradient(135deg, #2563EB 0%, #4F46E5 100%)",
+            background: "linear-gradient(135deg, #00529C 0%, #4FB3E8 100%)",
           }}
           aria-hidden="true"
         >
@@ -38,11 +38,11 @@ export function MobileHeader() {
             <circle cx="9" cy="9" r="1.3" fill="white" />
           </svg>
         </div>
-        <span className="text-[11px] font-bold tracking-widest text-nx-blue">NILAM</span>
+        <span className="text-[11px] font-bold tracking-widest text-bri-navy">NILAM</span>
       </div>
 
       {/* Hamburger */}
-      <Menu size={16} className="text-nx-muted" aria-label="Menu" />
+      <Menu size={16} className="text-bri-muted" aria-label="Menu" />
     </div>
   );
 }

@@ -37,21 +37,21 @@ const STATUS_ITEMS: StatusItem[] = [
 ];
 
 /**
- * Bottom footer bar matching the reference design:
- *  LEFT  — "SYSTEM STATUS" label + "All Systems Operational" green pill
- *  CENTER — evenly-spaced status items (icon + label + green status text)
+ * Bottom footer bar — SOFIA/BRI design theme.
+ *  LEFT  — "SYSTEM STATUS" label + "All Systems Operational" emerald pill
+ *  CENTER — evenly-spaced status items (icon + label + emerald status text)
  *  RIGHT  — "Last Update" + hardcoded timestamp "10:24:35"
  *
- * Height: ~44px (h-11). White background, top border.
+ * Height: ~44px (h-11). White background, soft top border (bri-line).
  */
 export function AppFooter() {
   return (
-    <footer className="flex h-11 shrink-0 items-center border-t border-nx-line bg-nx-card px-4">
+    <footer className="flex h-11 shrink-0 items-center border-t border-bri-line bg-white px-4">
       {/* ── LEFT: System Status label + pill ───────────────────────── */}
       <div className="flex shrink-0 items-center gap-2.5">
-        <span className="text-xs font-bold tracking-wider text-nx-ink">SYSTEM STATUS</span>
-        <span className="flex items-center gap-1.5 rounded-full bg-nx-okLight px-2.5 py-0.5 text-xs font-medium text-nx-ok">
-          <span className="h-1.5 w-1.5 rounded-full bg-nx-ok" aria-hidden="true" />
+        <span className="text-xs font-bold tracking-wider text-bri-ink">SYSTEM STATUS</span>
+        <span className="flex items-center gap-1.5 rounded-pill bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-600">
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" aria-hidden="true" />
           All Systems Operational
         </span>
       </div>
@@ -60,11 +60,11 @@ export function AppFooter() {
       <div className="flex flex-1 items-center justify-evenly px-4">
         {STATUS_ITEMS.map((item) => (
           <div key={item.label} className="flex items-center gap-1.5">
-            {/* Icon in blue */}
-            <span className="text-nx-blue">{item.icon}</span>
+            {/* Icon in bri-blue */}
+            <span className="text-bri-blue">{item.icon}</span>
             <div className="flex flex-col leading-tight">
-              <span className="text-xs font-medium text-nx-ink">{item.label}</span>
-              <span className="text-[10px] font-medium text-nx-ok">{item.statusText}</span>
+              <span className="text-xs font-medium text-bri-ink">{item.label}</span>
+              <span className="text-[10px] font-medium text-emerald-600">{item.statusText}</span>
             </div>
           </div>
         ))}
@@ -72,8 +72,8 @@ export function AppFooter() {
 
       {/* ── RIGHT: Last Update timestamp ────────────────────────────── */}
       <div className="flex shrink-0 flex-col items-end leading-tight">
-        <span className="text-[10px] text-nx-muted">Last Update</span>
-        <span className="text-xs font-semibold text-nx-ink">10:24:35</span>
+        <span className="text-[10px] text-bri-muted">Last Update</span>
+        <span className="text-xs font-semibold text-bri-ink">10:24:35</span>
       </div>
     </footer>
   );

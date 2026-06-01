@@ -140,35 +140,37 @@ export function MobileApp({
   }
 
   return (
-    <div className="flex h-full flex-col items-center justify-start overflow-hidden pt-2">
-      {/* ── iPhone mockup ──────────────────────────────────────────────── */}
-      <PhoneMockup>
-        {/* In-screen header */}
-        <MobileHeader />
+    <div className="flex h-full min-h-0 flex-col overflow-hidden">
+      {/* ── iPhone mockup — flex-1 so phone fills remaining column height ── */}
+      <div className="flex min-h-0 flex-1 items-center justify-center py-3">
+        <PhoneMockup>
+          {/* In-screen header */}
+          <MobileHeader />
 
-        {/* Animated screen area */}
-        <div className="relative min-h-0 flex-1 overflow-hidden">
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div
-              key={currentStep}
-              variants={slideVariants}
-              initial="enter"
-              animate="center"
-              exit="exit"
-              transition={slideTransition}
-              className="flex h-full flex-col"
-            >
-              {renderScreen()}
-            </motion.div>
-          </AnimatePresence>
-        </div>
+          {/* Animated screen area */}
+          <div className="relative min-h-0 flex-1 overflow-hidden">
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={currentStep}
+                variants={slideVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={slideTransition}
+                className="flex h-full flex-col"
+              >
+                {renderScreen()}
+              </motion.div>
+            </AnimatePresence>
+          </div>
 
-        {/* Bottom nav bar */}
-        <BottomNav />
-      </PhoneMockup>
+          {/* Bottom nav bar */}
+          <BottomNav />
+        </PhoneMockup>
+      </div>
 
-      {/* ── Flow stepper (outside phone, below) ────────────────────────── */}
-      <div className="w-full px-2">
+      {/* ── Flow stepper — shrink-0 pinned below phone, no gap ────────── */}
+      <div className="shrink-0 border-t border-bri-line bg-white px-2 pb-2 pt-1.5">
         <FlowStepper currentStep={currentStep} />
       </div>
     </div>

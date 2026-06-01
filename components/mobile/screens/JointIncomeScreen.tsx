@@ -36,8 +36,8 @@ export function JointIncomeScreen({ onAnswer, onGoBack, canGoBack }: JointIncome
     <div className="flex flex-1 flex-col px-4 py-3">
       {/* Title */}
       <div className="mb-3">
-        <h2 className="text-sm font-bold text-nx-ink">Joint Income?</h2>
-        <p className="mt-0.5 text-[10px] text-nx-muted">Pilih sesuai kondisi penghasilan Anda</p>
+        <h2 className="text-sm font-bold text-bri-ink">Joint Income?</h2>
+        <p className="mt-0.5 text-[10px] text-bri-muted">Pilih sesuai kondisi penghasilan Anda</p>
       </div>
 
       {/* Cards */}
@@ -49,15 +49,15 @@ export function JointIncomeScreen({ onAnswer, onGoBack, canGoBack }: JointIncome
             onClick={() => onAnswer(card.answer)}
             className={cn(
               "flex w-full items-center gap-3 rounded-xl border-2 p-3 text-left transition-all active:scale-[0.98]",
-              "border-nx-line bg-white hover:border-nx-blue hover:bg-blue-50"
+              "border-bri-line bg-white hover:border-bri-navy hover:bg-bri-bg"
             )}
           >
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-500 transition-colors group-hover:bg-nx-blue group-hover:text-white">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-bri-bg text-bri-blue transition-colors">
               {card.icon}
             </div>
             <div className="flex-1">
-              <p className="text-[11px] font-bold text-nx-ink">{card.label}</p>
-              <p className="text-[9px] text-nx-muted">{card.desc}</p>
+              <p className="text-[11px] font-bold text-bri-ink">{card.label}</p>
+              <p className="text-[9px] text-bri-muted">{card.desc}</p>
             </div>
           </button>
         ))}
@@ -68,7 +68,7 @@ export function JointIncomeScreen({ onAnswer, onGoBack, canGoBack }: JointIncome
         <button
           type="button"
           onClick={onGoBack}
-          className="mt-3 text-center text-[10px] text-nx-muted transition-colors hover:text-nx-blue"
+          className="mt-3 text-center text-[10px] text-bri-muted transition-colors hover:text-bri-blue"
         >
           ← Kembali
         </button>

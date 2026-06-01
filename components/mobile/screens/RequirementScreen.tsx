@@ -33,33 +33,33 @@ function UploadCard({ docKey, title, format, filename, filesize, uploaded, onUpl
       className={cn(
         "flex w-full items-start gap-2.5 rounded-xl border p-2.5 text-left transition-all",
         uploaded
-          ? "cursor-default border-green-200 bg-green-50"
-          : "cursor-pointer border-nx-line bg-white hover:border-nx-blue hover:shadow-sm active:scale-[0.99]"
+          ? "cursor-default border-emerald-200 bg-emerald-50"
+          : "cursor-pointer border-bri-line bg-white hover:border-bri-blue hover:shadow-soft active:scale-[0.99]"
       )}
     >
       <div
         className={cn(
           "mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg",
-          uploaded ? "bg-green-100 text-nx-ok" : "bg-blue-50 text-nx-blue"
+          uploaded ? "bg-emerald-100 text-emerald-600" : "bg-bri-bg text-bri-blue"
         )}
       >
         <FileText size={15} />
       </div>
 
       <div className="flex-1 min-w-0">
-        <p className="truncate text-[10px] font-semibold text-nx-ink">{title}</p>
-        {format && <p className="text-[8px] text-nx-muted">{format}</p>}
+        <p className="truncate text-[10px] font-semibold text-bri-ink">{title}</p>
+        {format && <p className="text-[8px] text-bri-muted">{format}</p>}
         {uploaded && (
-          <p className="mt-0.5 truncate text-[8px] text-nx-muted">
+          <p className="mt-0.5 truncate text-[8px] text-bri-muted">
             {filename}&nbsp;&nbsp;{filesize}
           </p>
         )}
       </div>
 
       {uploaded ? (
-        <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-nx-ok" />
+        <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-emerald-500" />
       ) : (
-        <span className="mt-0.5 shrink-0 rounded-full border border-nx-blue px-1.5 py-0.5 text-[7px] font-medium text-nx-blue">
+        <span className="mt-0.5 shrink-0 rounded-pill border border-bri-blue px-1.5 py-0.5 text-[7px] font-medium text-bri-blue">
           Upload
         </span>
       )}
@@ -69,13 +69,13 @@ function UploadCard({ docKey, title, format, filename, filesize, uploaded, onUpl
 
 function PayrollConfirmCard({ label }: { label: string }) {
   return (
-    <div className="flex w-full items-center gap-2.5 rounded-xl border border-green-200 bg-green-50 p-2.5">
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-green-100 text-nx-ok">
+    <div className="flex w-full items-center gap-2.5 rounded-xl border border-emerald-200 bg-emerald-50 p-2.5">
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600">
         <CheckCircle2 size={15} />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="truncate text-[10px] font-semibold text-nx-ok">{label}</p>
-        <p className="text-[8px] text-nx-muted">Data payroll digunakan (tanpa unggah dokumen)</p>
+        <p className="truncate text-[10px] font-semibold text-emerald-600">{label}</p>
+        <p className="text-[8px] text-bri-muted">Data payroll digunakan (tanpa unggah dokumen)</p>
       </div>
     </div>
   );
@@ -121,13 +121,13 @@ export function RequirementScreen({
     <div className="flex flex-1 flex-col px-3 py-2 overflow-y-auto">
       {/* Title */}
       <div className="mb-2">
-        <h2 className="text-[13px] font-bold text-nx-ink">Upload Dokumen</h2>
-        <p className="text-[9px] text-nx-muted">Untuk verifikasi penghasilan Anda</p>
+        <h2 className="text-[13px] font-bold text-bri-ink">Upload Dokumen</h2>
+        <p className="text-[9px] text-bri-muted">Untuk verifikasi penghasilan Anda</p>
       </div>
 
       {/* Nasabah Utama Section */}
       <div className="mb-2">
-        <p className="mb-1 text-[9px] font-bold uppercase tracking-wider text-nx-muted">
+        <p className="mb-1 text-[9px] font-semibold uppercase tracking-[0.14em] text-bri-muted">
           Nasabah Utama
         </p>
         {nasabahPayroll ? (
@@ -159,7 +159,7 @@ export function RequirementScreen({
       {/* Pasangan Section — only if isJoint */}
       {isJoint && (
         <div className="mb-2">
-          <p className="mb-1 text-[9px] font-bold uppercase tracking-wider text-nx-muted">
+          <p className="mb-1 text-[9px] font-semibold uppercase tracking-[0.14em] text-bri-muted">
             Pasangan
           </p>
           {pasanganPayroll ? (
@@ -189,12 +189,12 @@ export function RequirementScreen({
         </div>
       )}
 
-      {/* Info box — show when there is at least one upload section */}
+      {/* Info box — bri-bg tint, bri-blue icon */}
       {hasAnyUploadSection && (
-        <div className="mb-2 flex items-start gap-1.5 rounded-lg bg-blue-50 px-2.5 py-2">
-          <Info size={11} className="mt-0.5 shrink-0 text-blue-400" />
-          <p className="text-[8px] leading-relaxed text-blue-500">
-            ℹ Pastikan dokumen jelas &amp; terbaca.
+        <div className="mb-2 flex items-start gap-1.5 rounded-bubble bg-bri-bg px-2.5 py-2">
+          <Info size={11} className="mt-0.5 shrink-0 text-bri-blue" />
+          <p className="text-[8px] leading-relaxed text-bri-blue">
+            Pastikan dokumen jelas &amp; terbaca.
           </p>
         </div>
       )}
@@ -202,22 +202,21 @@ export function RequirementScreen({
       {/* Spacer */}
       <div className="flex-1" />
 
-      {/* Submit button */}
+      {/* Submit button — BRI navy gradient */}
       <button
         type="button"
         onClick={allUploaded && !validating ? onSubmit : undefined}
         disabled={!allUploaded || validating}
         className={cn(
-          "mt-2 flex w-full items-center justify-center gap-2 rounded-full py-2.5 text-[12px] font-semibold text-white transition-all",
+          "mt-2 flex w-full items-center justify-center gap-2 rounded-bubble py-2.5 text-[12px] font-semibold text-white transition-all",
           allUploaded && !validating
             ? "hover:opacity-90 active:scale-[0.98]"
             : "cursor-not-allowed opacity-60"
         )}
         style={{
-          background:
-            allUploaded
-              ? "linear-gradient(90deg, #2563EB 0%, #4F46E5 100%)"
-              : "linear-gradient(90deg, #94A3B8 0%, #94A3B8 100%)",
+          background: allUploaded
+            ? "linear-gradient(135deg, #00529C 0%, #1A6FC4 100%)"
+            : "#94A3B8",
         }}
       >
         {validating ? (
@@ -235,7 +234,7 @@ export function RequirementScreen({
         <button
           type="button"
           onClick={onGoBack}
-          className="mt-2 text-center text-[10px] text-nx-muted transition-colors hover:text-nx-blue"
+          className="mt-2 text-center text-[10px] text-bri-muted transition-colors hover:text-bri-blue"
         >
           ← Kembali
         </button>

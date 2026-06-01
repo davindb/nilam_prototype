@@ -5,31 +5,39 @@ interface PhoneMockupProps {
 }
 
 /**
- * iPhone-style bezel mockup — black rounded frame, dynamic-island notch,
- * white inner screen area. Fixed 272×440 px so it fits the 300px left column.
+ * iPhone-style bezel mockup — SOFIA theme.
+ *
+ * Layout strategy (fills the flex-1 wrapper in MobileApp):
+ *   - `h-full` → fills the parent height (the flex-1 centering div).
+ *   - `aspect-[9/19]` → maintains a proper tall-phone ratio (~0.47, like iPhone 15).
+ *   - `max-w-full` → never wider than the 300px column.
+ *   - The wrapper in MobileApp uses `flex items-center justify-center` so the
+ *     phone is centred horizontally and the aspect ratio does the rest.
+ *
+ * Result: at any viewport height the phone scales to fill the available space
+ * while keeping a real phone shape — no fixed-px brittleness, no empty gap below.
  */
 export function PhoneMockup({ children }: PhoneMockupProps) {
   return (
     <div
-      className="relative mx-auto shrink-0"
+      className="relative h-full max-w-full shrink-0"
       style={{
-        width: 272,
-        height: 440,
+        aspectRatio: "9 / 19",
         background: "linear-gradient(145deg, #1a1a1a 0%, #0d0d0d 100%)",
         borderRadius: "2.2rem",
         padding: "8px",
         boxShadow:
-          "0 24px 60px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.08) inset, 0 2px 4px rgba(255,255,255,0.12) inset",
+          "0 24px 60px rgba(16,24,40,0.22), 0 0 0 1px rgba(255,255,255,0.08) inset, 0 2px 4px rgba(255,255,255,0.12) inset",
       }}
     >
-      {/* Side buttons (decorative) */}
+      {/* Silent / volume buttons (decorative, left side) */}
       <div
         className="absolute"
         style={{
           left: -3,
-          top: 76,
+          top: "17%",
           width: 3,
-          height: 28,
+          height: "6%",
           background: "#2a2a2a",
           borderRadius: "3px 0 0 3px",
         }}
@@ -38,9 +46,9 @@ export function PhoneMockup({ children }: PhoneMockupProps) {
         className="absolute"
         style={{
           left: -3,
-          top: 112,
+          top: "25%",
           width: 3,
-          height: 44,
+          height: "10%",
           background: "#2a2a2a",
           borderRadius: "3px 0 0 3px",
         }}
@@ -49,21 +57,21 @@ export function PhoneMockup({ children }: PhoneMockupProps) {
         className="absolute"
         style={{
           left: -3,
-          top: 164,
+          top: "37%",
           width: 3,
-          height: 44,
+          height: "10%",
           background: "#2a2a2a",
           borderRadius: "3px 0 0 3px",
         }}
       />
-      {/* Power button */}
+      {/* Power button (right side) */}
       <div
         className="absolute"
         style={{
           right: -3,
-          top: 116,
+          top: "27%",
           width: 3,
-          height: 56,
+          height: "13%",
           background: "#2a2a2a",
           borderRadius: "0 3px 3px 0",
         }}
@@ -78,8 +86,8 @@ export function PhoneMockup({ children }: PhoneMockupProps) {
         <div className="absolute left-1/2 top-[6px] z-10 -translate-x-1/2">
           <div
             style={{
-              width: 88,
-              height: 22,
+              width: "32%",
+              aspectRatio: "4 / 1",
               background: "#0d0d0d",
               borderRadius: 999,
             }}
