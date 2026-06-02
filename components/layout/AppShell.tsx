@@ -51,13 +51,20 @@ export function AppShell({ mobile, dashboard }: AppShellProps) {
         <div
           className={`flex ${DASH_W} ${CANVAS_H} shrink-0 flex-col overflow-hidden rounded-card bg-white ring-1 ring-bri-line shadow-soft`}
         >
-          {/* Canvas header — title INSIDE the canvas (SOFIA panel style) */}
-          <div className="flex shrink-0 items-center gap-2 border-b border-bri-line px-4 py-3">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-bri-bg text-bri-blue">
-              <ClipboardList size={16} strokeWidth={2.25} aria-hidden="true" />
-            </span>
-            <h2 className="text-sm font-bold text-bri-navy">Behind The Scene Logic</h2>
-            <span className="text-[11px] text-bri-muted">(NILAM Engine)</span>
+          {/* Canvas header — title INSIDE the canvas (SOFIA panel style);
+              Demo Mode pill pinned to the top-right corner of the canvas. */}
+          <div className="flex shrink-0 items-center justify-between gap-2 border-b border-bri-line px-4 py-3">
+            <div className="flex items-center gap-2">
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-bri-bg text-bri-blue">
+                <ClipboardList size={16} strokeWidth={2.25} aria-hidden="true" />
+              </span>
+              <h2 className="text-sm font-bold text-bri-navy">Behind The Scene Logic</h2>
+              <span className="text-[11px] text-bri-muted">(NILAM Engine)</span>
+            </div>
+            <div className="flex items-center gap-1.5 rounded-pill border border-bri-line bg-bri-bg px-3 py-1 text-xs font-medium text-bri-ink">
+              <span className="h-2 w-2 rounded-full bg-emerald-500" aria-hidden="true" />
+              Demo Mode
+            </div>
           </div>
 
           {/* Canvas body — dashboard fills the rest, no internal scroll */}

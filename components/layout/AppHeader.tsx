@@ -48,12 +48,6 @@ export function AppHeader() {
       <p className="mt-1.5 text-xs font-medium uppercase tracking-[0.22em] text-bri-muted">
         New Intelligent Loan Application Management
       </p>
-
-      {/* Demo Mode pill */}
-      <div className="mt-3 flex items-center gap-1.5 rounded-pill border border-bri-line bg-white px-3 py-1 text-xs font-medium text-bri-ink shadow-soft">
-        <span className="h-2 w-2 rounded-full bg-emerald-500" aria-hidden="true" />
-        Demo Mode
-      </div>
     </header>
   );
 }
