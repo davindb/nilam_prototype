@@ -46,7 +46,7 @@ const STATUS_ITEMS: StatusItem[] = [
  */
 export function AppFooter() {
   return (
-    <footer className="flex h-11 shrink-0 items-center border-t border-bri-line bg-white px-4">
+    <footer className="flex h-11 shrink-0 items-center rounded-card border border-bri-line bg-white px-4 shadow-soft">
       {/* ── LEFT: System Status label + pill ───────────────────────── */}
       <div className="flex shrink-0 items-center gap-2.5">
         <span className="text-xs font-bold tracking-wider text-bri-ink">SYSTEM STATUS</span>

@@ -142,7 +142,7 @@ export function MobileApp({
   return (
     <div className="flex h-full min-h-0 flex-col overflow-hidden">
       {/* ── iPhone mockup — flex-1 so phone fills remaining column height ── */}
-      <div className="flex min-h-0 flex-1 items-center justify-center py-3">
+      <div className="flex min-h-0 flex-1 items-center justify-center px-4 py-3">
         <PhoneMockup>
           {/* In-screen header */}
           <MobileHeader />

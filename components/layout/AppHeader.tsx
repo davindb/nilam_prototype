@@ -1,32 +1,30 @@
 "use client";
 
-import { RefreshCw } from "lucide-react";
-
-interface AppHeaderProps {
-  onReset: () => void;
-}
-
 /**
- * Top header bar — SOFIA/BRI design theme.
- *  LEFT  — BRI navy→sky gradient logo cube + "NILAM" wordmark + divider + subtitle
- *  RIGHT — "Demo Mode" pill + "Reset Flow" button
+ * Centered showcase title block — SOFIA/BRI design theme.
  *
- * Height: ~56px (h-14). White background, soft bottom border (bri-line).
+ * Sits OUTSIDE the two canvases, horizontally centered at the top of the
+ * page (mirrors SOFIA's ShowcaseHeader). Top to bottom:
+ *   1. BRI navy→sky gradient cube logo + "NILAM" wordmark (row)
+ *   2. Expanded subtitle
+ *   3. "Demo Mode" pill
+ *
+ * Reset Flow is intentionally NOT here — it lives inside the dashboard
+ * canvas (Custom Persona card) so the title block stays clean and centered.
  */
-export function AppHeader({ onReset }: AppHeaderProps) {
+export function AppHeader() {
   return (
-    <header className="flex h-14 shrink-0 items-center justify-between border-b border-bri-line bg-white px-4 shadow-soft">
-      {/* ── LEFT: Logo + wordmark + subtitle ─────────────────────────── */}
+    <header className="flex flex-col items-center text-center">
+      {/* Logo + wordmark */}
       <div className="flex items-center gap-3">
-        {/* BRI navy→sky gradient cube logo */}
         <div
-          className="flex h-8 w-8 items-center justify-center rounded-lg"
+          className="flex h-9 w-9 items-center justify-center rounded-lg"
           style={{ background: "linear-gradient(135deg, #00529C 0%, #4FB3E8 100%)" }}
           aria-hidden="true"
         >
           <svg
-            width="18"
-            height="18"
+            width="20"
+            height="20"
             viewBox="0 0 18 18"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
@@ -43,34 +41,18 @@ export function AppHeader({ onReset }: AppHeaderProps) {
             <circle cx="9" cy="9" r="1.2" fill="white" />
           </svg>
         </div>
-
-        {/* Wordmark */}
-        <span className="text-lg font-bold tracking-widest text-bri-ink">NILAM</span>
-
-        {/* Thin vertical divider */}
-        <span className="mx-1 h-5 w-px bg-bri-line" aria-hidden="true" />
-
-        {/* Subtitle */}
-        <span className="text-sm text-bri-muted">New Intelligent Loan Application Management</span>
+        <span className="text-2xl font-bold tracking-[0.18em] text-bri-navy">NILAM</span>
       </div>
 
-      {/* ── RIGHT: Demo Mode pill + Reset Flow button ──────────────────── */}
-      <div className="flex items-center gap-2">
-        {/* Demo Mode pill — info style (bri-bg tint) */}
-        <div className="flex items-center gap-1.5 rounded-pill border border-bri-line bg-bri-bg px-3 py-1 text-sm text-bri-ink">
-          <span className="h-2 w-2 rounded-full bg-emerald-500" aria-hidden="true" />
-          Demo Mode
-        </div>
+      {/* Subtitle */}
+      <p className="mt-1.5 text-xs font-medium uppercase tracking-[0.22em] text-bri-muted">
+        New Intelligent Loan Application Management
+      </p>
 
-        {/* Reset Flow button */}
-        <button
-          type="button"
-          onClick={onReset}
-          className="flex items-center gap-1.5 rounded-pill border border-bri-line bg-white px-3 py-1 text-sm text-bri-ink transition-colors hover:border-bri-blue hover:text-bri-blue"
-        >
-          <RefreshCw size={13} aria-hidden="true" />
-          Reset Flow
-        </button>
+      {/* Demo Mode pill */}
+      <div className="mt-3 flex items-center gap-1.5 rounded-pill border border-bri-line bg-white px-3 py-1 text-xs font-medium text-bri-ink shadow-soft">
+        <span className="h-2 w-2 rounded-full bg-emerald-500" aria-hidden="true" />
+        Demo Mode
       </div>
     </header>
   );

@@ -30,7 +30,6 @@ export default function Page() {
 
   return (
     <AppShell
-      onReset={reset}
       mobile={
         <MobileApp
           persona={persona}
