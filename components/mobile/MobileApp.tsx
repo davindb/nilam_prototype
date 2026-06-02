@@ -37,7 +37,7 @@ interface MobileAppProps {
   start: () => void;
   next: () => void;
   goBack: () => void;
-  setUpload: (key: string) => void;
+  setUpload: (key: string, value?: boolean) => void;
   setJointAnswer: (ans: "ya" | "tidak") => void;
   submit: () => void;
   reset: () => void;

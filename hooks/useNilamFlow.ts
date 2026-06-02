@@ -39,7 +39,7 @@ export type NilamAction =
   | { type: "goTo"; step: FlowStep }
   | { type: "goBack" }
   | { type: "setJointAnswer"; answer: "ya" | "tidak" }
-  | { type: "setUpload"; key: string }
+  | { type: "setUpload"; key: string; value?: boolean }
   | { type: "appendEvent"; event: OrchestrationEvent }
   | { type: "setIncome"; role: "nasabah" | "pasangan"; income: CustomerIncome }
   | { type: "setComponent"; role: "nasabah" | "pasangan"; key: ComponentKey; patch: { mode?: ComponentMode; weight?: number } }
@@ -125,7 +125,10 @@ export function nilamReducer(state: NilamState, action: NilamAction): NilamState
       return { ...state, jointAnswer: action.answer };
 
     case "setUpload":
-      return { ...state, uploads: { ...state.uploads, [action.key]: true } };
+      return {
+        ...state,
+        uploads: { ...state.uploads, [action.key]: action.value ?? true },
+      };
 
     case "appendEvent":
       return { ...state, events: [...state.events, action.event] };
@@ -228,8 +231,8 @@ export function useNilamFlow() {
     dispatch({ type: "setJointAnswer", answer: ans });
   }, []);
 
-  const setUpload = useCallback((key: string) => {
-    dispatch({ type: "setUpload", key });
+  const setUpload = useCallback((key: string, value = true) => {
+    dispatch({ type: "setUpload", key, value });
   }, []);
 
   const setComponentMode = useCallback(

@@ -1,69 +1,125 @@
 "use client";
 
-import { FileText, CheckCircle2, Info, Loader2 } from "lucide-react";
+import { useState } from "react";
+import { FileText, CheckCircle2, Info, Loader2, UploadCloud, X } from "lucide-react";
 import { cn } from "@/lib/cn";
+import { monthFromKey } from "@/engines/ocr/coverage";
+import {
+  SLIP_MONTHS_FULL,
+  MUTASI_MONTHS_FULL,
+} from "@/data/ocrFixtures";
 
 interface RequirementScreenProps {
   nasabahPayroll: boolean;
   isJoint: boolean;
   pasanganPayroll: boolean;
   uploads: Record<string, boolean>;
-  onUpload: (key: string) => void;
+  onUpload: (key: string, value?: boolean) => void;
   onSubmit: () => void;
   validating: boolean;
   onGoBack?: () => void;
   canGoBack?: boolean;
 }
 
-interface DocCardProps {
+interface MultiUploadCardProps {
   docKey: string;
   title: string;
-  format?: string;
-  filename: string;
-  filesize: string;
+  /** Short helper line, e.g. "3 bulan terakhir · PDF/JPG/PNG". */
+  hint: string;
+  /** Month keys ("YYYY-MM") added as one batch on upload (one file/month). */
+  monthKeys: string[];
   uploaded: boolean;
-  onUpload: (key: string) => void;
+  onUpload: (key: string, value?: boolean) => void;
 }
 
-function UploadCard({ docKey, title, format, filename, filesize, uploaded, onUpload }: DocCardProps) {
+/**
+ * Multi-file upload card — one file per month, in the field a customer may
+ * provide several (3 slip gaji, up to 12 mutasi). Tapping "Upload File"
+ * simulates a multi-file picker that adds the whole batch at once; the result
+ * shows a count + per-month chips and can be cleared to re-upload. Stays clean
+ * even at 12 files (compact month chips that wrap).
+ */
+function MultiUploadCard({ docKey, title, hint, monthKeys, uploaded, onUpload }: MultiUploadCardProps) {
+  const [files, setFiles] = useState<string[]>(() => (uploaded ? monthKeys : []));
+  const hasFiles = files.length > 0;
+
+  function uploadBatch() {
+    setFiles(monthKeys);
+    onUpload(docKey, true);
+  }
+  function clearAll() {
+    setFiles([]);
+    onUpload(docKey, false);
+  }
+
   return (
-    <button
-      type="button"
-      onClick={() => !uploaded && onUpload(docKey)}
+    <div
       className={cn(
-        "flex w-full items-start gap-2.5 rounded-xl border p-2.5 text-left transition-all",
-        uploaded
-          ? "cursor-default border-emerald-200 bg-emerald-50"
-          : "cursor-pointer border-bri-line bg-white hover:border-bri-blue hover:shadow-soft active:scale-[0.99]"
+        "w-full rounded-xl border p-2.5 transition-all",
+        hasFiles ? "border-emerald-200 bg-emerald-50/60" : "border-bri-line bg-white"
       )}
     >
-      <div
-        className={cn(
-          "mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg",
-          uploaded ? "bg-emerald-100 text-emerald-600" : "bg-bri-bg text-bri-blue"
-        )}
-      >
-        <FileText size={15} />
+      {/* Header */}
+      <div className="flex items-start gap-2.5">
+        <div
+          className={cn(
+            "mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg",
+            hasFiles ? "bg-emerald-100 text-emerald-600" : "bg-bri-bg text-bri-blue"
+          )}
+        >
+          <FileText size={15} />
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-1.5">
+            <p className="truncate text-[10px] font-semibold text-bri-ink">{title}</p>
+            {hasFiles && (
+              <span className="shrink-0 rounded-pill bg-emerald-100 px-1.5 py-px text-[8px] font-semibold text-emerald-700">
+                {files.length} file
+              </span>
+            )}
+          </div>
+          <p className="text-[8px] text-bri-muted">{hint}</p>
+        </div>
+        {hasFiles && <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-emerald-500" />}
       </div>
 
-      <div className="flex-1 min-w-0">
-        <p className="truncate text-[10px] font-semibold text-bri-ink">{title}</p>
-        {format && <p className="text-[8px] text-bri-muted">{format}</p>}
-        {uploaded && (
-          <p className="mt-0.5 truncate text-[8px] text-bri-muted">
-            {filename}&nbsp;&nbsp;{filesize}
-          </p>
-        )}
-      </div>
-
-      {uploaded ? (
-        <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-emerald-500" />
+      {hasFiles ? (
+        <>
+          {/* Per-month chips */}
+          <div className="mt-2 flex flex-wrap gap-1">
+            {files.map((k) => (
+              <span
+                key={k}
+                className="rounded bg-white px-1.5 py-0.5 text-[8px] font-medium leading-none text-bri-ink ring-1 ring-emerald-200"
+              >
+                {monthFromKey(k).label}
+              </span>
+            ))}
+          </div>
+          {/* Clear action */}
+          <div className="mt-2 flex justify-end">
+            <button
+              type="button"
+              onClick={clearAll}
+              className="flex items-center gap-1 text-[8px] font-medium text-bri-muted transition-colors hover:text-red-500"
+            >
+              <X size={9} /> Hapus semua
+            </button>
+          </div>
+        </>
       ) : (
-        <span className="mt-0.5 shrink-0 rounded-pill border border-bri-blue px-1.5 py-0.5 text-[7px] font-medium text-bri-blue">
-          Upload
-        </span>
+        /* Empty → dropzone */
+        <button
+          type="button"
+          onClick={uploadBatch}
+          className="mt-2 flex w-full flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-bri-blue/50 bg-bri-bg/40 py-2.5 text-bri-blue transition-colors hover:bg-bri-bg active:scale-[0.99]"
+        >
+          <UploadCloud size={16} />
+          <span className="text-[9px] font-semibold">Upload File</span>
+          <span className="text-[7px] text-bri-muted">Bisa pilih lebih dari 1 file</span>
+        </button>
       )}
-    </button>
+    </div>
   );
 }
 
@@ -134,21 +190,19 @@ export function RequirementScreen({
           <PayrollConfirmCard label="✓ Nasabah Payroll BRI" />
         ) : (
           <div className="flex flex-col gap-1.5">
-            <UploadCard
+            <MultiUploadCard
               docKey="slip_gaji"
               title="Slip Gaji"
-              format="Format: PDF, JPG, PNG"
-              filename="slip_gaji_nasabah.pdf"
-              filesize="1.2 MB"
+              hint="3 bulan terakhir · PDF/JPG/PNG"
+              monthKeys={SLIP_MONTHS_FULL}
               uploaded={!!uploads["slip_gaji"]}
               onUpload={onUpload}
             />
-            <UploadCard
+            <MultiUploadCard
               docKey="mutasi"
-              title="Mutasi Rekening (12 Bulan)"
-              format="Format: PDF"
-              filename="mutasi_12_bulan.pdf"
-              filesize="2.4 MB"
+              title="Mutasi Rekening"
+              hint="Minimal 12 bulan terakhir · 1 file / bulan"
+              monthKeys={MUTASI_MONTHS_FULL}
               uploaded={!!uploads["mutasi"]}
               onUpload={onUpload}
             />
@@ -166,21 +220,19 @@ export function RequirementScreen({
             <PayrollConfirmCard label="✓ Pasangan Payroll BRI" />
           ) : (
             <div className="flex flex-col gap-1.5">
-              <UploadCard
+              <MultiUploadCard
                 docKey="spouse_slip"
                 title="Slip Gaji Pasangan"
-                format="Format: PDF, JPG, PNG"
-                filename="slip_gaji_pasangan.pdf"
-                filesize="1.1 MB"
+                hint="3 bulan terakhir · PDF/JPG/PNG"
+                monthKeys={SLIP_MONTHS_FULL}
                 uploaded={!!uploads["spouse_slip"]}
                 onUpload={onUpload}
               />
-              <UploadCard
+              <MultiUploadCard
                 docKey="spouse_mutasi"
-                title="Mutasi Pasangan (12 Bulan)"
-                format="Format: PDF"
-                filename="mutasi_pasangan_12bln.pdf"
-                filesize="2.2 MB"
+                title="Mutasi Pasangan"
+                hint="Minimal 12 bulan terakhir · 1 file / bulan"
+                monthKeys={MUTASI_MONTHS_FULL}
                 uploaded={!!uploads["spouse_mutasi"]}
                 onUpload={onUpload}
               />
