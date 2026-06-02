@@ -13,7 +13,7 @@ interface AppShellProps {
 /** Fixed canvas dimensions — the single design frame.
  *  Both canvases share CANVAS_H so they align side-by-side; the dashboard is
  *  designed so ALL content fits inside this frame with no internal scroll. */
-const CANVAS_H = "h-[840px]";
+const CANVAS_H = "h-[900px]";
 const MOBILE_W = "w-[360px]";
 const DASH_W = "w-[960px]";
 

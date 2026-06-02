@@ -1,6 +1,6 @@
 "use client";
 
-import { Info, RefreshCw } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 import { cn } from "@/lib/cn";
 
 interface PersonaSelectorProps {
@@ -10,13 +10,49 @@ interface PersonaSelectorProps {
   onReset: () => void;
 }
 
+/** One compact segmented Payroll | Non-Payroll toggle row. */
+function SegmentedToggle({
+  label,
+  isPayroll,
+  onChange,
+}: {
+  label: string;
+  isPayroll: boolean;
+  onChange: (v: boolean) => void;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-1.5">
+      <span className="text-[9px] font-semibold text-bri-ink">{label}</span>
+      <div className="flex shrink-0 overflow-hidden rounded-md border border-bri-line bg-bri-bg/60 p-0.5">
+        {[
+          { lbl: "Payroll", val: true },
+          { lbl: "Non-Payroll", val: false },
+        ].map(({ lbl, val }) => (
+          <button
+            key={lbl}
+            type="button"
+            onClick={() => onChange(val)}
+            className={cn(
+              "rounded px-2 py-0.5 text-[8.5px] font-semibold leading-none transition-all",
+              isPayroll === val
+                ? "bg-bri-navy text-white shadow-sm"
+                : "text-bri-muted hover:text-bri-ink"
+            )}
+          >
+            {lbl}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 /**
- * PersonaSelector — narrow left strip of the "Behind The Scene" dashboard.
+ * PersonaSelector — compact "Custom Persona" control card.
  *
- * Two segmented toggle groups:
- *   - Nasabah Utama: Payroll | Non-Payroll
- *   - Pasangan:      Payroll | Non-Payroll
- * + Reset Flow button at the bottom.
+ * Content-height (no h-full / flex-1) and w-full so the parent owns width.
+ * Two stacked segmented toggles + a compact Reset Flow button. Designed to be
+ * short (~110-130px) so an AI Insight card can stack directly below it.
  */
 export function PersonaSelector({
   persona,
@@ -25,104 +61,35 @@ export function PersonaSelector({
   onReset,
 }: PersonaSelectorProps) {
   return (
-    <div className="flex w-[180px] shrink-0 flex-col rounded-xl border border-bri-line bg-white shadow-soft">
+    <div className="flex w-full flex-col gap-2 rounded-xl border border-bri-line bg-white px-2.5 py-2 shadow-soft">
       {/* Section label */}
-      <div className="px-2.5 pb-1 pt-2">
+      <div className="flex items-center justify-between">
         <span className="text-[9px] font-semibold uppercase tracking-[0.12em] text-bri-muted">
           Custom Persona
         </span>
-        <p className="mt-0.5 text-[8px] leading-relaxed text-bri-muted/70">
-          Atur tipe penghasilan nasabah &amp; pasangan
-        </p>
-      </div>
-
-      {/* Toggle groups */}
-      <div className="flex flex-1 flex-col gap-2.5 px-2.5 pb-2.5">
-        {/* Nasabah Utama */}
-        <div className="flex flex-col gap-1">
-          <span className="text-[9px] font-semibold text-bri-ink">
-            Nasabah Utama
-          </span>
-          <div className="flex overflow-hidden rounded-lg border border-bri-line bg-bri-bg/60 p-0.5 gap-0.5">
-            <button
-              type="button"
-              onClick={() => onSetNasabahPayroll(true)}
-              className={cn(
-                "flex-1 rounded-md py-1 text-[9px] font-semibold transition-all",
-                persona.nasabahPayroll
-                  ? "bg-bri-navy text-white shadow-sm"
-                  : "text-bri-muted hover:text-bri-ink"
-              )}
-            >
-              Payroll
-            </button>
-            <button
-              type="button"
-              onClick={() => onSetNasabahPayroll(false)}
-              className={cn(
-                "flex-1 rounded-md py-1 text-[9px] font-semibold transition-all",
-                !persona.nasabahPayroll
-                  ? "bg-bri-navy text-white shadow-sm"
-                  : "text-bri-muted hover:text-bri-ink"
-              )}
-            >
-              Non-Payroll
-            </button>
-          </div>
-        </div>
-
-        {/* Pasangan */}
-        <div className="flex flex-col gap-1">
-          <span className="text-[9px] font-semibold text-bri-ink">
-            Pasangan
-          </span>
-          <div className="flex overflow-hidden rounded-lg border border-bri-line bg-bri-bg/60 p-0.5 gap-0.5">
-            <button
-              type="button"
-              onClick={() => onSetPasanganPayroll(true)}
-              className={cn(
-                "flex-1 rounded-md py-1 text-[9px] font-semibold transition-all",
-                persona.pasanganPayroll
-                  ? "bg-bri-navy text-white shadow-sm"
-                  : "text-bri-muted hover:text-bri-ink"
-              )}
-            >
-              Payroll
-            </button>
-            <button
-              type="button"
-              onClick={() => onSetPasanganPayroll(false)}
-              className={cn(
-                "flex-1 rounded-md py-1 text-[9px] font-semibold transition-all",
-                !persona.pasanganPayroll
-                  ? "bg-bri-navy text-white shadow-sm"
-                  : "text-bri-muted hover:text-bri-ink"
-              )}
-            >
-              Non-Payroll
-            </button>
-          </div>
-        </div>
-
-        {/* Active-scenario note — fills the column cleanly, no empty bottom */}
-        <div className="mt-auto flex items-start gap-1.5 rounded-lg bg-bri-bg/70 p-2">
-          <Info size={11} className="mt-px shrink-0 text-bri-blue" />
-          <p className="text-[8px] leading-relaxed text-bri-muted">
-            Tipe <span className="font-semibold text-bri-ink">Joint Income</span> dipilih nasabah di aplikasi mobile.
-          </p>
-        </div>
-      </div>
-
-      {/* Reset Flow button */}
-      <div className="border-t border-bri-line px-2 py-1.5">
         <button
           type="button"
           onClick={onReset}
-          className="flex w-full items-center justify-center gap-1 rounded-lg py-1 text-[10px] font-medium text-bri-muted transition-colors hover:bg-bri-bg hover:text-bri-blue"
+          title="Reset Flow"
+          className="flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[8.5px] font-semibold text-bri-muted transition-colors hover:bg-bri-bg hover:text-bri-blue"
         >
-          <RefreshCw size={10} />
-          ↻ Reset Flow
+          <RefreshCw size={9} />
+          Reset
         </button>
+      </div>
+
+      {/* Toggle groups */}
+      <div className="flex flex-col gap-1.5">
+        <SegmentedToggle
+          label="Nasabah Utama"
+          isPayroll={persona.nasabahPayroll}
+          onChange={onSetNasabahPayroll}
+        />
+        <SegmentedToggle
+          label="Pasangan"
+          isPayroll={persona.pasanganPayroll}
+          onChange={onSetPasanganPayroll}
+        />
       </div>
     </div>
   );
