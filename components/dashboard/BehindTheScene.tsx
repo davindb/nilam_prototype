@@ -56,8 +56,8 @@ export function BehindTheScene({
   return (
     <div className="flex h-full min-h-0 flex-col gap-3 overflow-hidden bg-[#F5F7FA] p-3">
 
-      {/* ── ROW A — flex-[4]: Persona | Pipeline+OCR ──────────────────── */}
-      <div className="flex min-h-0 flex-[4] gap-3 overflow-hidden">
+      {/* ── ROW A — flex-[7]: Persona | Pipeline+OCR ──────────────────── */}
+      <div className="flex min-h-0 flex-[7] gap-3 overflow-hidden">
         {/* Narrow left: persona selector — fixed width, full row height */}
         <PersonaSelector
           persona={persona}
@@ -76,7 +76,7 @@ export function BehindTheScene({
           {/* OCR row fills remaining height: Processing (~40%) + JSON (~60%) */}
           <div className="flex min-h-0 flex-1 gap-3 overflow-hidden">
             <div className="w-[40%] shrink-0 overflow-hidden">
-              <OcrProcessingCard ocrStatus={ocrStatus} />
+              <OcrProcessingCard ocrStatus={ocrStatus} isJoint={isJoint} />
             </div>
             <div className="flex min-h-0 min-w-0 flex-1 overflow-hidden">
               <OcrJsonCard
@@ -89,12 +89,12 @@ export function BehindTheScene({
         </div>
       </div>
 
-      {/* ── ROW B — flex-[3]: Fraud · [Identity Pasangan?] · SLIK ─────
+      {/* ── ROW B — flex-[7]: Fraud · [Identity Pasangan?] · SLIK ─────
            joint  → grid-cols-3: Fraud | Identity (Pasangan) | SLIK
            single → grid-cols-2: Fraud | SLIK (spouse card not rendered)
       ────────────────────────────────────────────────────────────── */}
       <div
-        className={`grid min-h-0 flex-[3] gap-3 overflow-hidden ${
+        className={`grid min-h-0 flex-[7] gap-3 overflow-hidden ${
           isJoint ? "grid-cols-3" : "grid-cols-2"
         }`}
       >
@@ -117,12 +117,12 @@ export function BehindTheScene({
         />
       </div>
 
-      {/* ── ROW C — flex-[3]: Income Nasabah · [Income Pasangan?] · THP
+      {/* ── ROW C — flex-[6]: Income Nasabah · [Income Pasangan?] · THP
            joint  → grid-cols-3: Income Nasabah | Income Pasangan | THP
            single → grid-cols-2: Income Nasabah | THP (spouse card not rendered)
       ────────────────────────────────────────────────────────────── */}
       <div
-        className={`grid min-h-0 flex-[3] gap-3 overflow-hidden ${
+        className={`grid min-h-0 flex-[6] gap-3 overflow-hidden ${
           isJoint ? "grid-cols-3" : "grid-cols-2"
         }`}
       >

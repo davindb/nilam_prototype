@@ -1,7 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { FileText, CheckCircle2, AlertTriangle, SlidersHorizontal } from "lucide-react";
+import {
+  FileText,
+  CheckCircle2,
+  AlertTriangle,
+  SlidersHorizontal,
+  User,
+  Users,
+} from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/cn";
 import { DEMO_CONTROLS } from "@/lib/demo";
@@ -16,6 +23,8 @@ import type { NodeStatus } from "@/types/orchestration";
 
 interface OcrProcessingCardProps {
   ocrStatus: NodeStatus;
+  /** When true, also render a "Pasangan Nasabah" section. */
+  isJoint: boolean;
 }
 
 interface DocSectionProps {
@@ -32,11 +41,11 @@ interface DocSectionProps {
 }
 
 /**
- * One document type inside the OCR card.
+ * One document type (Slip Gaji / Mutasi).
  *   idle    → "Menunggu dokumen", empty bar
  *   running → "Mengekstrak data..", animated bar
- *   success → period (first–last month) + per-month chips. For mutasi
- *             (showCoverage) it also reports "X dari Y bulan terdeteksi" and
+ *   success → period (first–last month) + per-month chips. Mutasi
+ *             (showCoverage) also reports "X dari Y bulan terdeteksi" and
  *             flags any interior gap; slip gaji just shows it was extracted.
  */
 function DocSection({ title, monthKeys, showCoverage, minMonths = 0, targetPercent, ocrStatus }: DocSectionProps) {
@@ -52,7 +61,7 @@ function DocSection({ title, monthKeys, showCoverage, minMonths = 0, targetPerce
   const barColor = isDone ? "bg-emerald-500" : "bg-bri-blue";
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-1">
+    <div className="flex flex-col gap-1">
       {/* Header: icon + title + file count + status icon */}
       <div className="flex items-center gap-1">
         <FileText
@@ -117,11 +126,11 @@ function DocSection({ title, monthKeys, showCoverage, minMonths = 0, targetPerce
             })}
           </div>
 
-          {/* Status line — single line so the fixed-height card never clips */}
+          {/* Status line — single line so it never clips */}
           {showCoverage ? (
             <span
               className={cn(
-                "mt-auto flex items-center gap-1 pt-0.5 text-[8px] font-semibold",
+                "flex items-center gap-1 pt-0.5 text-[8px] font-semibold",
                 hasGap ? "text-amber-600" : "text-emerald-600"
               )}
             >
@@ -138,7 +147,7 @@ function DocSection({ title, monthKeys, showCoverage, minMonths = 0, targetPerce
               )}
             </span>
           ) : (
-            <span className="mt-auto flex items-center gap-1 pt-0.5 text-[8px] font-medium text-emerald-600">
+            <span className="flex items-center gap-1 pt-0.5 text-[8px] font-medium text-emerald-600">
               <CheckCircle2 size={9} strokeWidth={2.5} />
               Data berhasil diekstrak
             </span>
@@ -149,13 +158,51 @@ function DocSection({ title, monthKeys, showCoverage, minMonths = 0, targetPerce
   );
 }
 
+interface PartyDocsProps {
+  label: string;
+  icon: React.ReactNode;
+  gapMode: boolean;
+  ocrStatus: NodeStatus;
+}
+
+/** One party (Nasabah Utama / Pasangan Nasabah): Slip Gaji + Mutasi Rekening. */
+function PartyDocs({ label, icon, gapMode, ocrStatus }: PartyDocsProps) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      {/* Party label */}
+      <div className="flex items-center gap-1 border-b border-bri-line/70 pb-1 text-bri-navy">
+        {icon}
+        <span className="text-[8px] font-bold uppercase tracking-[0.1em]">{label}</span>
+      </div>
+
+      <DocSection
+        title="Slip Gaji"
+        monthKeys={SLIP_MONTHS_FULL}
+        showCoverage={false}
+        targetPercent={76}
+        ocrStatus={ocrStatus}
+      />
+      <DocSection
+        title="Mutasi Rekening"
+        monthKeys={gapMode ? MUTASI_MONTHS_GAP : MUTASI_MONTHS_FULL}
+        showCoverage
+        minMonths={MUTASI_MIN_MONTHS}
+        targetPercent={62}
+        ocrStatus={ocrStatus}
+      />
+    </div>
+  );
+}
+
 /**
- * OcrProcessingCard — extraction progress + per-month coverage. Slip Gaji shows
- * extracted months only; Mutasi Rekening runs gap analysis (X-of-12 + interior
- * gaps). A demo-only toggle (hidden in production via {@link DEMO_CONTROLS})
- * flips mutasi between complete data and a gap scenario.
+ * OcrProcessingCard — extraction progress + per-month coverage, grouped by
+ * party (Nasabah Utama, plus Pasangan Nasabah when joint). Slip Gaji shows
+ * extracted months only; Mutasi runs gap analysis (X-of-12 + interior gaps).
+ * The body scrolls internally so the fixed-height card never clips. A demo-only
+ * toggle (hidden in production via {@link DEMO_CONTROLS}) flips mutasi between
+ * complete data and a gap scenario.
  */
-export function OcrProcessingCard({ ocrStatus }: OcrProcessingCardProps) {
+export function OcrProcessingCard({ ocrStatus, isJoint }: OcrProcessingCardProps) {
   const [gapMode, setGapMode] = useState(false);
 
   return (
@@ -201,24 +248,22 @@ export function OcrProcessingCard({ ocrStatus }: OcrProcessingCardProps) {
         )}
       </div>
 
-      {/* Slip Gaji (no gap analysis) + Mutasi Rekening (full coverage) */}
-      <div className="flex min-h-0 flex-1 flex-col gap-2">
-        <DocSection
-          title="Slip Gaji"
-          monthKeys={SLIP_MONTHS_FULL}
-          showCoverage={false}
-          targetPercent={76}
+      {/* Scrollable body — Nasabah Utama + (joint) Pasangan Nasabah */}
+      <div className="flex min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto scroll-thin pr-0.5">
+        <PartyDocs
+          label="Nasabah Utama"
+          icon={<User size={11} strokeWidth={2.25} aria-hidden="true" />}
+          gapMode={gapMode}
           ocrStatus={ocrStatus}
         />
-        <div className="h-px w-full shrink-0 bg-bri-line/70" />
-        <DocSection
-          title="Mutasi Rekening"
-          monthKeys={gapMode ? MUTASI_MONTHS_GAP : MUTASI_MONTHS_FULL}
-          showCoverage
-          minMonths={MUTASI_MIN_MONTHS}
-          targetPercent={62}
-          ocrStatus={ocrStatus}
-        />
+        {isJoint && (
+          <PartyDocs
+            label="Pasangan Nasabah"
+            icon={<Users size={11} strokeWidth={2.25} aria-hidden="true" />}
+            gapMode={gapMode}
+            ocrStatus={ocrStatus}
+          />
+        )}
       </div>
     </div>
   );
