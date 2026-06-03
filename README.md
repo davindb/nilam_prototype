@@ -16,24 +16,31 @@ designed to be embeddable into BRImo, RM Tools, underwriting platforms, or
 conversational AI — wherever a loan decision needs to be made.
 
 This prototype demonstrates the engine internals visually, following the same
-split-screen pattern as the SOFIA prototype that precedes it.
+two-canvas showcase model as the SOFIA prototype that precedes it.
 
 **Scope:** Fix Income customers only. Non-Fix Income is shown in the UI but is
 disabled ("coming soon").
 
 ---
 
-## The Split Screen
+## The Two Canvases
 
-| Left | Right |
+The page renders two **fixed-size canvases** side by side, with a centered
+NILAM wordmark above and a System Status footer below. Because both canvases
+are fixed-px (`360×900` mobile, `960×900` dashboard), browser zoom scales them
+uniformly and proportions stay identical at any resolution. Only the page
+scrolls — the canvases never scroll internally; on narrow screens the dashboard
+wraps below the phone.
+
+| Left — Mobile App canvas | Right — Behind The Scene Logic canvas |
 |---|---|
-| Mobile app simulation — the customer's view of the loan onboarding flow | **Behind The Scene Logic** — real-time AI orchestration panel |
+| The customer's view: an iPhone mockup running the loan-onboarding flow, with a 5-step **Flow Stepper** pinned beneath it. | The **NILAM Engine** dashboard — a real-time AI orchestration panel. A `Demo Mode` pill is pinned to its header. |
 
-The right panel renders a live event-driven pipeline as it executes:
-OCR extraction, fraud screening, SLIK bureau retrieval, income extraction,
-and THP (Take Home Pay) computation. Every node emits lifecycle events
-(`running → success`) with confidence scores and reasoning text, making the
-underwriting decision **explainable** to RM and risk stakeholders.
+The right canvas renders a live event-driven pipeline as it executes — OCR
+extraction, document validation, fraud screening, identity check, SLIK bureau
+retrieval, income extraction, and THP (Take Home Pay) computation. Every node
+emits lifecycle events (`running → success`), making the underwriting decision
+**explainable** to RM and risk stakeholders.
 
 **Key design note:** Angsuran (monthly debt obligation) is an **output of the
 SLIK Retrieval engine** — it comes from the bureau pull, not OCR. This matches
@@ -41,66 +48,137 @@ how it works in production underwriting.
 
 ---
 
-## The 4 Personas
+## The Dashboard (Behind The Scene Logic)
 
-| ID | Label | Flow Steps | Pipeline Nodes |
-|---|---|---|---|
-| `payroll-single` | Fix Income · Payroll BRI · Non-Joint | opening → payroll_confirm → processing → submitted | 3 nasabah nodes (payroll_pull, slik, income) + thp = **4** |
-| `payroll-joint` | Fix Income · Payroll BRI · Joint | opening → payroll_confirm → joint_documents → processing → submitted | 4 nasabah + 7 pasangan nodes = **11** |
-| `nonpayroll-single` | Fix Income · Non-Payroll · Non-Joint | opening → income_type → document_upload → processing → submitted | 7 nasabah nodes (ocr×3, fraud, slik, income) + thp = **8** |
-| `nonpayroll-joint` | Fix Income · Non-Payroll · Joint | opening → income_type → document_upload → joint_documents → processing → submitted | 7 nasabah + 7 pasangan + thp = **15** |
+A fixed, no-scroll grid that fills the canvas. Top to bottom:
 
-**Payroll BRI** skips all document upload screens — payroll data is pulled
-directly from BRI's core banking system (`payroll_pull` node).
+- **Application Status Bar** — the 5-second headline outcome. Transitions
+  `idle → processing → eligible`, ending on a bold **VERIFIED & ELIGIBLE**
+  badge with a confidence score and a `LOW RISK` chip.
+- **Row A** — a narrow left column (**Custom Persona** selector stacked above an
+  **AI Underwriting Insight** card showing the model's *conclusions*, not the
+  workflow) beside the **AI Orchestration Pipeline** and the OCR row
+  (**OCR Processing** + raw **OCR JSON** tokenizer).
+- **Row B** — **Fraud Detection** · **Identity Check** (joint only) · **SLIK
+  Retrieval**.
+- **Row C** — **Income Components — Nasabah** · **Income Components — Pasangan**
+  (joint only) · **THP Calculation Engine**.
 
-**Joint income** adds a full pasangan (spouse) leg: KTP identity OCR,
-liveness selfie verification, mutasi OCR, fraud screening, SLIK retrieval,
-and income extraction. Joint also requires a `joint_documents` input step
-where the customer uploads spouse documents.
+The **THP Engine** is the dashboard **hero**: THP is the final output of the
+whole orchestration, so it gets extra width, a premium navy→blue treatment, and
+an animated count-up of the total Take-Home Pay (nasabah + pasangan when joint),
+plus a `RUMUS` formula strip (weighted income components − angsuran).
+
+---
+
+## The Customer Flow
+
+Every application follows the **same fixed 6-step flow**, surfaced in the Flow
+Stepper beneath the phone:
+
+```
+Opening → Income Type → Joint Income → Requirement → Processing → Analyst Decision
+```
+
+- **Income Type** — Fix Income is selectable; Non-Fix Income is "coming soon".
+- **Joint Income** — the customer answers *joint or single*; this drives whether
+  the spouse (**pasangan**) legs appear across the dashboard.
+- **Requirement** — adapts to the persona: **Payroll** customers skip document
+  upload (payroll is pulled from BRI core banking), while **Non-Payroll**
+  customers upload Slip Gaji + Mutasi Rekening.
+- **Processing → Analyst Decision** — Submit kicks the orchestrator; when the
+  pipeline finishes, the flow advances to the analyst decision.
+
+### Choosing a persona
+
+The persona is set on the dashboard's **Custom Persona** control — two segmented
+toggles, **Nasabah Utama** and **Pasangan**, each `Payroll | Non-Payroll`
+(default: Nasabah *Payroll*, Pasangan *Non-Payroll*). Changing either toggle
+**resets the flow**. Joint vs. single is chosen in-flow on the Joint Income
+screen.
+
+---
+
+## The Pipeline
+
+A single canonical **8-stage pipeline** runs for every application:
+
+```
+Upload → OCR → Validasi Dokumen → Fraud Detection → Identity Check
+       → SLIK Retrieval → Income Extraction → THP Engine
+```
+
+Each node emits `running → success` lifecycle events with mock outputs. The
+**joint-income legs** (Identity Check, plus the spouse's SLIK & income) only
+populate when the customer answered "joint"; otherwise they resolve empty and
+their dashboard cards are hidden.
+
+### OCR Processing & mutasi gap detection
+
+The **OCR Processing** card groups extraction by party (**Nasabah Utama**, plus
+**Pasangan Nasabah** when joint) and by document (**Slip Gaji**, **Mutasi
+Rekening**). Slip Gaji shows the extracted period; Mutasi runs **coverage
+analysis** — *X of 12 months detected* with per-month chips and interior-gap
+flagging. A **demo-only** `Lengkap | Gap` toggle (gated by `DEMO_CONTROLS`,
+see below) flips mutasi between complete data and a missing-month scenario.
 
 ---
 
 ## Module Map
 
 ```
+app/
+  page.tsx                    Wires useNilamFlow → AppShell (MobileApp + BehindTheScene)
+  layout.tsx, globals.css     Root layout + BRI design tokens / .scroll-thin
+
+components/
+  layout/                     AppShell (SOFIA two-canvas frame), AppHeader, AppFooter
+  mobile/                     Left canvas — PhoneMockup, MobileHeader, BottomNav, FlowStepper
+    screens/                  Opening, IncomeType, JointIncome, Requirement, Processing,
+                               AnalystDecision (one per FlowStep)
+  dashboard/                  Right canvas — BehindTheScene (the grid) + its cards:
+                               ApplicationStatusBar, PersonaSelector, AiInsightCard,
+                               OrchestrationPipeline, OcrProcessingCard, OcrJsonCard,
+                               FraudDetectionCard, IdentityCheckCard, SlikRetrievalCard,
+                               IncomeComponentsCard, ThpEngineCard, SpiderChart
+
 engines/
   orchestrator/
     workflowOrchestrator.ts   Event-emitting async pipeline runner (per-node delay + cancellable)
-    pipelines.ts              Builds NodeSpec[] per persona (payroll vs. non-payroll, joint vs. single)
+    pipelines.ts              PIPELINE_NODES — the canonical 8-stage node list
     events.ts                 EventListener type contract
-  ocr/                        OCR engine — extracts slip gaji & mutasi components
+  ocr/
+    ocrEngine.ts              OCR engine — extracts slip gaji & mutasi components
+    coverage.ts               analyzeOcrCoverage() — month coverage + interior-gap detection
   fraud/                      Fraud screening & liveness engine (confidence-scored)
   slik/                       SLIK retrieval engine — produces totalAngsuran
   income/                     Income extraction engine — structures avg/min per component
-  thp/                        THP computation engine — aggregates weighted income minus angsuran
+  thp/                        THP computation engine — computeThp / computeJointThp
   persona/
-    personaEngine.ts          planFlow() — pure function; maps PersonaConfig → FlowStep[]
+    personaEngine.ts          planFlow() — pure function returning the fixed FlowStep[]
 
 hooks/
   useNilamFlow.ts             Central state machine (useReducer) + orchestration kick
-  useOrchestrationFeed.ts     Derives O(1) latest-event Map from raw OrchestrationEvent[]
+  useOrchestrationFeed.ts     Derives O(1) latest-event Map + statusOf() from the event stream
   useCountUp.ts               Animated integer count-up; respects prefers-reduced-motion
 
-components/
-  phone/                      Left panel — mobile app simulation screens per FlowStep
-  orchestration/              Right panel — BehindTheScenePanel, PipelineNode, CustomerCard,
-                               IncomeComponentRow, ThpEngineCard, ConfidenceMeter, ...
-  common/                     Shared primitives (GlassCard, SectionHeading, LiveIndicator, …)
-
 data/
-  personas.ts                 PERSONAS constant array
-  ocrFixtures.ts              Mock OCR outputs (MUTASI, SLIP_GAJI, spouse variants, KTP_PASANGAN)
-  slikFixtures.ts             Mock SLIK outputs (SLIK_NASABAH, SLIK_PASANGAN with totalAngsuran)
+  personas.ts                 DEFAULT_PERSONA
+  ocrFixtures.ts              Mock OCR outputs + month-coverage fixtures (full / gap variants)
+  fraudFixtures.ts            Mock fraud result (per-check + overall scores)
+  slikFixtures.ts             Mock SLIK outputs (SLIK_NASABAH, SLIK_PASANGAN)
+  incomeFixtures.ts           Mock structured income (NASABAH_INCOME, PASANGAN_INCOME)
 
 lib/
   formatRupiah.ts             Rupiah/juta formatters (handles negatives with proper − sign)
-  cn.ts                       Tailwind class merger
+  cn.ts                       Tailwind class merger (clsx + tailwind-merge)
+  demo.ts                     DEMO_CONTROLS flag — gates demo-only controls
 
 types/
   flow.ts                     FlowStep, PersonaConfig
-  orchestration.ts            OrchestrationEvent, NodeSpec, NodeLeg, NodeStatus, nodeKey()
+  orchestration.ts            OrchestrationEvent, NodeId, NodeStatus, nodeKey()
   income.ts                   CustomerIncome, IncomeComponent, ComponentKey, ComponentMode
-  engines.ts                  OcrMutasiResult, FraudResult, SlikResult, IdentityResult
+  engines.ts                  OcrSlipResult, OcrMutasiResult, FraudResult, SlikResult, IdentityResult
 ```
 
 ---
@@ -110,9 +188,22 @@ types/
 ```bash
 npm install
 npm run dev          # Development server → http://localhost:3000
-npm test             # Vitest unit tests (engines: thpEngine, personaEngine)
+npm test             # Vitest unit tests (run once)
+npm run test:watch   # Vitest in watch mode
+npm run lint         # Next.js lint
 npm run build        # Production build verification
 ```
+
+**Tests** cover the pure logic: `thpEngine`, `personaEngine`,
+`incomeExtractionEngine`, OCR `coverage`, orchestrator `pipelines`, and the
+`useNilamFlow` reducer.
+
+### Demo Mode
+
+Demo-only controls (e.g. the OCR `Lengkap | Gap` simulator) are gated behind
+`DEMO_CONTROLS`, which defaults to **on**. Set
+`NEXT_PUBLIC_DEMO_CONTROLS=false` in a production build to hide every demo-only
+control at once.
 
 ---
 
@@ -135,6 +226,7 @@ represent actual credit bureau or bank data.
 | Styling | Tailwind CSS 3.4 (BRI design tokens) |
 | Animation | Framer Motion 11 |
 | Icons | lucide-react |
+| Class utils | clsx + tailwind-merge |
 | Tests | Vitest 2 |
 
 ---
